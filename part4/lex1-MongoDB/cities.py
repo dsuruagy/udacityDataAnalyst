@@ -1,6 +1,20 @@
 import csv
 from datetime import datetime
 
+FIELDS = {
+	'URI' : 'URI',
+	'elevation' : 'elevation',
+	'name' : 'name',
+	'point' : 'point',
+	'populationTotal' : 'populationTotal',
+	'utcOffset' : 'utcOffset', 
+	'country_label' : 'country',
+	'isPartOf_label' : 'isPartOf',
+	'timeZone_label' : 'timeZone',
+	'postalCode' : 'postalCode',
+	'foundingDate' : 'foundingDate'
+	}
+
 def skip_lines(input_file, skip):
     for i in range(0, skip):
         next(input_file)
@@ -58,17 +72,24 @@ def process_cities_file(input_file):
     input_data = csv.DictReader(open(input_file))
     #pprint.pprint(input_data.fieldnames)
 
+    keys = FIELDS.keys()
     cities = []
     skip_lines(input_data, 3)
     for row in input_data:
         city = {}
 
         for field, val in row.iteritems():
+	    if not field in keys:
+		continue
+	    else:
+		field = FIELDS[field]
+		
             if empty_val(val):
                 continue
             if field in ["foundingDate"] and "{" not in val:
                 #doc["foundingDate"] = datetime.strptime(doc["foundingDate"], "%Y-%m-%d")
                 city["foundingDate"] = datetime.strptime(val, "%Y-%m-%d")
+
             else:
                 val = val.strip()
                 val = parse_array(val)
