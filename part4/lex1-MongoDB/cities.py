@@ -6,7 +6,7 @@ FIELDS = {
 	'elevation' : 'elevation',
 	'name' : 'name',
 	'point' : 'point',
-	'populationTotal' : 'populationTotal',
+	'populationTotal' : 'population',
 	'utcOffset' : 'utcOffset', 
 	'country_label' : 'country',
 	'isPartOf_label' : 'isPartOf',
@@ -69,31 +69,39 @@ def empty_val(val):
     return (val == "NULL") or (val == "")
 
 def process_cities_file(input_file):
-    input_data = csv.DictReader(open(input_file))
+	input_data = csv.DictReader(open(input_file))
     #pprint.pprint(input_data.fieldnames)
 
-    keys = FIELDS.keys()
-    cities = []
-    skip_lines(input_data, 3)
-    for row in input_data:
-        city = {}
+	keys = FIELDS.keys()
+	cities = []
+	skip_lines(input_data, 3)
+	for row in input_data:
+		city = {}
 
-        for field, val in row.iteritems():
-	    if not field in keys:
-		continue
-	    else:
-		field = FIELDS[field]
+		for field, val in row.iteritems():
+			if not field in keys:
+				continue
+			else:
+				field = FIELDS[field]
 		
-            if empty_val(val):
-                continue
-            if field in ["foundingDate"] and "{" not in val:
+			if empty_val(val):
+				continue
+			if field in ["foundingDate"] and "{" not in val:
                 #doc["foundingDate"] = datetime.strptime(doc["foundingDate"], "%Y-%m-%d")
-                city["foundingDate"] = datetime.strptime(val, "%Y-%m-%d")
+                #city["foundingDate"] = datetime.strptime(val, "%Y-%m-%d")
+				val = datetime.strptime(val, "%Y-%m-%d")
 
-            else:
-                val = val.strip()
-                val = parse_array(val)
-                city[field] = val
-        cities.append(city)
-    return cities
+			elif field == 'population':
+				if val.startswith('{'):
+					val = parse_array(val)
+					val = max([int(v) for v in val])
+				else:
+					val = int(val)
+			else:
+				val = val.strip()
+				val = parse_array(val)
+
+			city[field] = val
+		cities.append(city)
+	return cities
 
