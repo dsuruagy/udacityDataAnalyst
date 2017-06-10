@@ -12,7 +12,10 @@ FIELDS = {
 	'isPartOf_label' : 'isPartOf',
 	'timeZone_label' : 'timeZone',
 	'postalCode' : 'postalCode',
-	'foundingDate' : 'foundingDate'
+	'foundingDate' : 'foundingDate',
+	'wgs84_pos#lat' : 'lat',
+	'wgs84_pos#long' : 'lon'
+
 	}
 
 def skip_lines(input_file, skip):
@@ -91,12 +94,12 @@ def process_cities_file(input_file):
                 #city["foundingDate"] = datetime.strptime(val, "%Y-%m-%d")
 				val = datetime.strptime(val, "%Y-%m-%d")
 
-			elif field == 'population':
+			elif field in ['elevation', 'population', 'lat', 'lon']:
 				if val.startswith('{'):
 					val = parse_array(val)
-					val = max([int(v) for v in val])
+					val = max([ensure_float(v) for v in val])
 				else:
-					val = int(val)
+					val = ensure_float(val)
 			else:
 				val = val.strip()
 				val = parse_array(val)
