@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import xml.etree.cElementTree as ET
-import pprint
 import re
 import codecs
 import json
+from audit_streets import audit_street_name
 
 lower = re.compile(r'^([a-z]|_)*$')
 lower_colon = re.compile(r'^([a-z]|_)*:([a-z]|_)*$')
@@ -16,8 +16,8 @@ ROOT_KEYS = ["id", "visible", "type", "pos", "amenity", "cuisine", "name", "phon
 
 def shape_element(element):
     node = {}
+
     if element.tag == "node" or element.tag == "way" :
-        # YOUR CODE HERE
         node['type'] = element.tag
 
         # attributes in the CREATED array should be added under a key "created"
@@ -43,22 +43,30 @@ def shape_element(element):
             key = tag.get("k")
             value = tag.get("v")
 
-            # if the second level tag "k" value contains problematic characters, it should be ignored
+            # if the second level tag "k" value contains problematic
+            # characters, it should be ignored
             if problemchars.match(key):
                 continue
 
+            # if the second level tag "k" value does not start with "addr:"
             elif lower.match(key) and key in ROOT_KEYS:
                 node[key] = value
 
-            # if the second level tag "k" value does not start with "addr:"
+            # if it is an address
             elif lower_colon.match(key):
                 if key.startswith('addr:'):
                     key = re.match(r'^([a-z]*):([a-z]*)$', key).group(2)
+
+                    if key == 'street':
+                        value = audit_street_name(value)
+
+                    # fills address dictionary
                     addr_values[key] = value
 
         if len(addr_values) > 0:
             node['address'] = addr_values
 
+        # Process Node tags
         nd_values = [nd.get('ref') for nd in element.findall("nd")]
 
         if len(nd_values) > 0:

@@ -4,5 +4,4 @@ from write_json import process_map
 import pprint
 
 if __name__ == "__main__":
-    data = process_map('rio-sample.osm', True)
-    pprint.pprint(data[0])
+    data = process_map('rio-sample3.osm', True)
