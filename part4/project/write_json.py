@@ -85,7 +85,7 @@ def process_map(file_in, pretty = False):
         for _, element in ET.iterparse(file_in):
             el = shape_element(element)
             if el:
-                data.append(el)
+                #data.append(el)
                 if pretty:
                     fo.write(json.dumps(el, indent=2, ensure_ascii=False)+"\n")
                 else:
