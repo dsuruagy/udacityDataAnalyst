@@ -55,8 +55,12 @@ def shape_element(element):
             # if it is an address
             elif lower_colon.match(key):
                 if key.startswith('addr:'):
-                    key = re.match(r'^([a-z]*):([a-z]*)$', key).group(2)
-
+                    try:
+                        # take only the second part of address
+                        key = re.match(r'^([a-z]*):([a-z_]*)$', key).group(2)
+                    except AttributeError:
+                        print 'Error on key ', key
+                        
                     if key == 'street':
                         value = audit_street_name(value)
 

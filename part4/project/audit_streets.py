@@ -33,10 +33,14 @@ def audit_street_name(street_name):
     return street_name
      
 def audit_street_type(street_types, street_name):
+    # audit if street name starts with a name and a dot, defined in regex
     m = street_type_re.search(street_name)
     if m:
         street_type = m.group()
+        
+        # if the first name is not in expected, it need to be adjusted
         if street_type not in expected:
+            
             if street_types != None:
                 street_types[street_type].add(street_name)
 
@@ -57,6 +61,8 @@ def audit_comma_present(streets_with_comma, street_name):
     if m:
         if streets_with_comma != None:
             streets_with_comma.append(street_name)
+            
+        # remove the content after the comma    
         street_name = commas_present_re.search(street_name).group(1)
         
         return street_name
