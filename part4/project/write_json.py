@@ -4,6 +4,7 @@
 import xml.etree.cElementTree as ET
 import re
 import codecs
+import os
 import json
 from audit_streets import audit_street_name
 
@@ -82,7 +83,8 @@ def shape_element(element):
 
 
 def process_map(file_in, pretty = False):
-    # You do not need to change this file
+    print 'Input file size:  {0}MB'.format(os.stat(file_in).st_size/(1024**2))
+
     file_out = "{0}.json".format(file_in)
     data = []
     with codecs.open(file_out, "w", encoding='utf8') as fo:
@@ -94,4 +96,6 @@ def process_map(file_in, pretty = False):
                     fo.write(json.dumps(el, indent=2, ensure_ascii=False)+"\n")
                 else:
                     fo.write(json.dumps(el, ensure_ascii=False) + "\n")
+    print 'Output file size: {0}MB'.format(os.stat(file_out).st_size/(1024**2))
+
     return data
