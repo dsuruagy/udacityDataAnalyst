@@ -99,3 +99,11 @@ def process_map(file_in, pretty = False):
     print 'Output file size: {0}MB'.format(os.stat(file_out).st_size/(1024**2))
 
     return data
+    
+#OSMFILE  = 'rio-de-janeiro_brazil.osm'
+OSMFILE  = 'rio-sample.osm'
+
+if __name__ == "__main__":
+    
+    print '*** Writing JSON file...'
+    data = process_map(OSMFILE, False)

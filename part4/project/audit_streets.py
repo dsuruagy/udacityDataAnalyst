@@ -98,7 +98,7 @@ def update_name(name, mapping):
 
 
 if __name__ == '__main__':
-    st_types, st_comma = audit('Recife.osm')
+    st_types, st_comma = audit('rio-sample.osm')
     print 'Commas present:'
     pprint.pprint(st_comma)
     print '\nType issues:'
