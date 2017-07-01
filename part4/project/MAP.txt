@@ -1,0 +1,6 @@
+Map position
+
+The map used was collected from https://mapzen.com/data/metro-extracts/metro/rio-de-janeiro_brazil/ .
+
+I intended to use my brazilian hometown (Recife), but the data was really poor. So I've decided to download the map from a city where I already lived, Rio de Janeiro, that is a very known city outside Brazil.
+
