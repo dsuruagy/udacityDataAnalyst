@@ -7,6 +7,7 @@ import codecs
 import os
 import json
 from audit_streets import audit_street_name
+from audit_postcodes import audit_postcode
 
 lower = re.compile(r'^([a-z]|_)*$')
 lower_colon = re.compile(r'^([a-z]|_)*:([a-z]|_)*$')
@@ -64,6 +65,9 @@ def shape_element(element):
                         
                     if key == 'street':
                         value = audit_street_name(value)
+                        
+                    if key == 'postcode':
+                        value = audit_postcode(value)
 
                     # fills address dictionary
                     addr_values[key] = value
@@ -100,8 +104,8 @@ def process_map(file_in, pretty = False):
 
     return data
     
-#OSMFILE  = 'rio-de-janeiro_brazil.osm'
-OSMFILE  = 'rio-sample.osm'
+OSMFILE  = 'rio-de-janeiro_brazil.osm'
+#OSMFILE  = 'rio-sample.osm'
 
 if __name__ == "__main__":
     

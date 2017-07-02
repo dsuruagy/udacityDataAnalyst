@@ -12,7 +12,7 @@ from pymongo import MongoClient
 
 DB_NAME = 'examples'
 COLLECTION_NAME = 'rio_osm'
-API_KEY='use_your_key'
+API_KEY='your_key_here'
 
 def find_correct_city(coords_array):
     gmaps = googlemaps.Client(key=API_KEY)
