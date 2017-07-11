@@ -56,7 +56,7 @@ def audit(osmfile):
     return incorrect_postcodes
 
 if __name__ == '__main__':
-    incorrect_postcodes = audit('rio-de-janeiro_brazil.osm')
+    incorrect_postcodes = audit('rio-sample.osm')
     
     print 'Incorrect postcodes:'
     pprint.pprint(incorrect_postcodes)
