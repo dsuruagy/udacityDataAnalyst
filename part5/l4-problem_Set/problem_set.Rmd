@@ -1,0 +1,122 @@
+---
+title: "Lesson 4 - Problem set"
+output: html_notebook
+---
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+```{r Load diamonds dataset}
+data(diamonds)
+str(diamonds)
+summary(diamonds)
+```
+
+# Create a histogram of the price of
+# all the diamonds in the diamond data set.
+```{r Price Histogram}
+library(ggplot2)
+qplot(data=diamonds, x=price, binwidth=400, 
+      color=I('black'), fill=I('cyan')) +
+  scale_x_continuous(limits = c(0,10000), breaks = seq(0, 10000, 500))
+```
+```{r Price Histogram Summary}
+summary(diamonds$price)
+```
+```{r Diamond Counts}
+sum(diamonds$price < 500)
+sum(diamonds$price < 250)
+sum(diamonds$price >= 15000)
+```
+# Break out the histogram of diamond prices by cut.
+
+# You should have five histograms in separate
+# panels on your resulting plot.
+```{r Price by Cut Histograms}
+#?cut
+#diamonds$cuts <- cut(diamonds$price, 5, labels = FALSE)
+
+library(ggplot2)
+qplot(data=diamonds, x=price) +
+  facet_wrap(~cut)
+
+
+```
+```{r Price by Cut}
+by(diamonds$price, diamonds$cut, summary)
+```
+# The 'Fair' and 'Good' diamonds appear to have 
+# different distributions compared to the better
+# cut diamonds. They seem somewhat uniform
+# on the left with long tails on the right.
+
+# Let's look in to this more.
+
+# Look up the documentation for facet_wrap in R Studio.
+# Then, scroll back up and add a parameter to facet_wrap so that
+# the y-axis in the histograms is not fixed. You want the y-axis to
+# be different for each histogram.
+
+```{r Scales and Multiple Histograms}
+library(ggplot2)
+qplot(data=diamonds, x=price) +
+  facet_wrap(~cut, scales = "free_y")
+```
+# Create a histogram of price per carat
+# and facet it by cut. You can make adjustments
+# to the code from the previous exercise to get
+# started.
+
+# Adjust the bin width and transform the scale
+# of the x-axis using log10.
+
+```{r Price per Carat by Cut}
+library(ggplot2)
+qplot(data=diamonds, x=price/carat, color = I('white'), binwidth=0.09) +
+  facet_wrap(~cut, scales = "free_y") +
+  scale_x_log10()
+```
+# Investigate the price of diamonds using box plots,
+# numerical summaries, and one of the following categorical
+# variables: cut, clarity, or color.
+
+# There won’t be a solution video for this
+# exercise so go to the discussion thread for either
+# BOXPLOTS BY CLARITY, BOXPLOT BY COLOR, or BOXPLOTS BY CUT
+# to share you thoughts and to
+# see what other people found.
+```{r Price Box Plots}
+library(ggplot2)
+qplot(data=diamonds, geom="boxplot", y=price, x=color) +
+  coord_cartesian(ylim=c(0,8000))
+ggsave('priceHistogram.png')
+```
+```{r Interquartile Range - IQR}
+by(diamonds$price, diamonds$color, summary)
+
+?IQR
+# 3302.5
+IQR(subset(diamonds, color=='D')$price)
+# 5834.5
+IQR(subset(diamonds, color=='J')$price)
+```
+# Investigate the price per carat of diamonds across
+# the different colors of diamonds using boxplots.
+```{r Price per Carat Box Plots by Color}
+library(ggplot2)
+ggplot(data=diamonds, aes(x=color, y=price/carat)) +
+  geom_boxplot() +
+  coord_cartesian(ylim=c(0,5500))
+```
+
+# Investigate the weight of the diamonds (carat) using a frequency polygon. 
+# Use different bin widths to see how the frequency polygon changes
+
+```{r Carat Frequency Polygon}
+library(ggplot2)
+ggplot(diamonds, aes(carat)) + 
+  geom_freqpoly(binwidth=0.1) +
+  scale_x_continuous(breaks = seq(0,5,0.2)) +
+  scale_y_continuous(breaks = seq(0,10500, 1000))
+```
+

@@ -1,0 +1,33 @@
+```{r Reading Gapminder data}
+#install.packages('readxl')
+library(readxl)
+setwd('/home/daniel/dataAnalyst/part5/l4-problem_Set')
+xlsx_oil <- read_excel('Oil Production.xls.xlsx')
+```
+
+```{r Acquiring Tidy data}
+library(tidyr)
+library(dplyr)
+tidy_oil <- tidyr::gather(xlsx_oil, "year", "production", 2:48)
+oil_production <- dplyr::filter(tidy_oil, !is.na(production))
+colnames(oil_production)[1] <- 'country'
+```
+Graphics that could be plotted:
+1) Scatterplot of total oil production per year
+2) Line for x=year y=production and color=country (geom_line)
+3) Boxplot for production of each country
+
+```{r Country production by year}
+library(ggplot2)
+ggplot(subset(oil_production, as.numeric(year)%%10 == 0)) +
+  geom_line(aes(x=year, y=production, colour=country, group=country)) +
+  theme(legend.position="top")
+
+```
+
+```{r Boxplots for production in some countries}
+library(ggplot2)
+ggplot(oil_production, aes(x=country, y=production)) +
+  geom_boxplot()
+```
+
