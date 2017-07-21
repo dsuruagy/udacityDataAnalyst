@@ -19,15 +19,22 @@ Graphics that could be plotted:
 
 ```{r Country production by year}
 library(ggplot2)
-ggplot(subset(oil_production, as.numeric(year)%%10 == 0)) +
-  geom_line(aes(x=year, y=production, colour=country, group=country)) +
-  theme(legend.position="top")
+selected_countries <- c('Brazil', 'Canada', 'China', 'Iraq', 'Nigeria', 'Russia', 'Saudi Arabia', 'United States', 'Venezuela')
 
+ggplot(subset(oil_production, as.numeric(year)%%5 == 0 & country %in% selected_countries)) +
+  geom_line(aes(x=year, y=production, colour=country, group=country)) +
+  theme(legend.position="top") +
+  labs(x='Year', y='Oil Production')
+ggsave('lineProductionPerYear.png')
 ```
 
 ```{r Boxplots for production in some countries}
 library(ggplot2)
-ggplot(oil_production, aes(x=country, y=production)) +
-  geom_boxplot()
+ggplot(subset(oil_production, country %in% selected_countries), 
+       aes(x=country, y=production, fill = country)) +
+  geom_boxplot() +
+  theme(legend.position="none", axis.text.x=element_text(angle=90)) +
+  labs(x='Country', y='Oil Production')
+ggsave('boxProductionPerCountriy.png')
 ```
 
