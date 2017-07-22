@@ -1,0 +1,50 @@
+### Exploring Your Friends' Birthdays
+
+Import the data set
+```{r}
+setwd('/home/daniel/desenv/udacity/dataAnalyst/part5/l4-problem_Set')
+birthdays <- read.csv('birthdays.csv')
+birthdays$day <- as.Date(birthdays$Start, format = '%m/%d/%Y')
+str(birthdays)
+```
+
+# Your task is to investigate the distribution of your friends'
+# birth months and days.
+
+# Here some questions you could answer, and we hope you think of others.
+
+# **********************************************************************
+
+# How many people share your birthday? Do you know them?
+# (Reserve time with them or save money to buy them a gift!)
+```{r}
+my_birthday <- format(as.Date('02/01', format='%m/%d'), '%m/%d')
+share_my_birthday <- subset(birthdays, format(birthdays$day, '%m/%d') == my_birthday)
+share_my_birthday
+```
+
+# Which month contains the most number of birthdays?
+
+# How many birthdays are in each month?
+
+```{r}
+library(ggplot2)
+ggplot(birthdays, aes(x=format(day, '%m')) ) +
+  geom_bar() +
+  scale_y_continuous(breaks = seq(1,30,2)) +
+  labs(x='Month', y='Number of birthdays')
+```
+
+# Which day of the year has the most number of birthdays?
+```{r}
+library(ggplot2)
+birthdays$month <- format(birthdays$day, '%B')
+ggplot(birthdays, aes(x=format(day, "%d"))) +
+  geom_bar() +
+  facet_wrap(~ month, scales = "free_y")
+```
+
+
+
+# Do you have at least 365 friends that have birthdays on everyday
+# of the year?
