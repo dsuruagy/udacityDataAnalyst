@@ -1,0 +1,41 @@
+---
+title: "l6-gapminder"
+output: html_document
+---
+
+## Load Gapminder data
+
+```{r reading the gapminder data}
+library(readxl)
+setwd('/home/daniel/dataAnalyst/part5/l6-problem_Set/')
+le_xlsx <- read_xlsx('indicator life_expectancy_at_birth.xlsx')
+ge_xlsx <- read_xlsx('indicator_per capita government expenditure on health at average exchange rate (us$).xlsx')
+
+```
+
+## Turning into tidy data
+```{r}
+library(tidyr)
+library(dplyr)
+life_expectancy <- le_xlsx %>% gather("year", "life_expect", 2:218) %>%
+  dplyr::filter(year > 1995 & year < 2011)
+colnames(life_expectancy)[1] <- 'country'
+
+gov_expenditure <- ge_xlsx %>% gather ("year", "gov_health_expend", 2:17)
+colnames(gov_expenditure)[1] <- 'country'
+
+gapminder <- inner_join(life_expectancy, gov_expenditure)
+```
+
+## Verifying correlation
+```{r}
+cor.test(gapminder$life_expect, gapminder$gov_health_expend)
+```
+
+## Scatterplot
+```{r}
+library(ggplot2)
+ggplot(gapminder, aes(x=gov_health_expend, y=life_expect)) +
+  geom_point()
+```
+
