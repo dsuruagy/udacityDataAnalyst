@@ -37,5 +37,35 @@ cor.test(gapminder$life_expect, gapminder$gov_health_expend)
 library(ggplot2)
 ggplot(gapminder, aes(x=gov_health_expend, y=life_expect)) +
   geom_point()
+ggsave('scatterRaw.png')
+```
+```{r}
+library(ggplot2)
+ggplot(subset(gapminder, !is.na(c(gov_health_expend, life_expectancy))), 
+       aes(x=gov_health_expend, y=life_expect)) +
+  geom_point(alpha=1/10, color=('orange')) +
+  geom_smooth()
+ggsave('scatterAlpha.png')
 ```
 
+
+
+```{r}
+library(ggplot2)
+ggplot(subset(gapminder, !is.na(c(gov_health_expend, life_expectancy))), 
+       aes(x=gov_health_expend, y=life_expect)) +
+  geom_point(alpha=1/10, color = ('green')) +
+  scale_x_sqrt() +
+  geom_smooth()
+ggsave('scatterSqrt.png')
+```
+
+```{r}
+library(ggplot2)
+ggplot(subset(gapminder, !is.na(c(gov_health_expend, life_expectancy))), 
+       aes(x=gov_health_expend, y=life_expect)) +
+  geom_point(alpha=1/5, color = ('red')) +
+  scale_x_log10() +
+  geom_smooth()
+ggsave('scatterLog10.png')
+```
