@@ -1,0 +1,260 @@
+---
+title: "l8-problem_set"
+output: html_document
+---
+
+# Price Histograms with Facet and Color
+
+ Create a histogram of diamond prices.
+ Facet the histogram by diamond color
+ and use cut to color the histogram bars.
+
+ The plot should look something like this.
+ http://i.imgur.com/b5xyrOu.jpg
+
+ Note: In the link, a color palette of type
+ 'qual' was used to color the histogram using
+ scale_fill_brewer(type = 'qual')
+
+```{r}
+library(ggplot2)
+
+data(diamonds)
+
+ggplot(diamonds, aes(x=price)) +
+  geom_histogram(aes(fill = cut)) +
+  scale_fill_brewer(type = 'qual') +
+  facet_wrap(~ color) +
+  scale_x_log10()
+```
+
+# Price vs. Table Colored by Cut
+
+ Create a scatterplot of diamond price vs.
+ table and color the points by the cut of
+ the diamond.
+
+ The plot should look something like this.
+ http://i.imgur.com/rQF9jQr.jpg
+
+ Note: In the link, a color palette of type
+ 'qual' was used to color the scatterplot using
+ scale_color_brewer(type = 'qual')
+
+```{r}
+library(ggplot2)
+ggplot(diamonds, aes(x=table, y=price)) +
+  geom_point(aes(color = cut)) +
+  scale_color_brewer(type = 'qual') +
+  scale_x_continuous(limits = c(50,80), breaks = seq(50, 80, by=2))
+```
+
+# Typical Table Value
+
+typical table range for ideal cut: 53 to 57
+typical table range for premium cut: 58 to 62
+
+# Price vs. Volume and Diamond Clarity
+
+ Create a scatterplot of diamond price vs.
+ volume (x * y * z) and color the points by
+ the clarity of diamonds. Use scale on the y-axis
+ to take the log10 of price. You should also
+ omit the top 1% of diamond volumes from the plot.
+
+ Note: Volume is a very rough approximation of
+ a diamond's actual volume.
+
+ The plot should look something like this.
+ http://i.imgur.com/excUpea.jpg
+
+ Note: In the link, a color palette of type
+ 'div' was used to color the scatterplot using
+ scale_color_brewer(type = 'div')
+
+```{r}
+library(ggplot2)
+
+ggplot(subset(diamonds, (x * y * z) > 0), aes(x=(x * y * z), y=price)) +
+  geom_point(aes(color = clarity)) +
+  scale_y_log10() +
+  scale_color_brewer(type = 'div') +
+  scale_x_continuous(limits = c(0,350)) + 
+  labs(colour = 'Clarity', x = 'volume')
+```
+
+# Proportion of Friendships Initiated
+
+ Many interesting variables are derived from two or more others.
+ For example, we might wonder how much of a person's network on
+ a service like Facebook the user actively initiated. Two users
+ with the same degree (or number of friends) might be very
+ different if one initiated most of those connections on the
+ service, while the other initiated very few. So it could be
+ useful to consider this proportion of existing friendships that
+ the user initiated. This might be a good predictor of how active
+ a user is compared with their peers, or other traits, such as
+ personality (i.e., is this person an extrovert?).
+
+ Your task is to create a new variable called 'prop_initiated'
+ in the Pseudo-Facebook data set. The variable should contain
+ the proportion of friendships that the user initiated.
+ 
+```{r}
+pf <- read.delim('../l3-explore_1_var/pseudo_facebook.tsv')
+
+pf$prop_initiated <- pf$friendships_initiated / pf$friend_count
+```
+
+# prop_initiated vs. tenure
+
+ Create a line graph of the median proportion of
+ friendships initiated ('prop_initiated') vs.
+ tenure and color the line segment by
+ year_joined.bucket.
+
+ Recall, we created year_joined.bucket in Lesson 5
+ by first creating year_joined from the variable tenure.
+ Then, we used the cut function on year_joined to create
+ four bins or cohorts of users.
+
+ (2004, 2009]
+ (2009, 2011]
+ (2011, 2012]
+ (2012, 2014]
+
+ The plot should look something like this.
+ http://i.imgur.com/vNjPtDh.jpg
+ OR this
+ http://i.imgur.com/IBN1ufQ.jpg
+
+```{r}
+pf$year_joined <- 2014 - ceiling(pf$tenure / 365)
+pf$year_joined.bucket <- cut(pf$year_joined, breaks=c(2004, 2009, 2011, 2012, 2014))
+
+library(ggplot2)
+ggplot(pf, aes(x=tenure, y=prop_initiated)) +
+  geom_line(aes(color = year_joined.bucket), stat = 'summary', fun.y = median)
+```
+
+# Smoothing prop_initiated vs. tenure
+
+ Smooth the last plot you created of
+ of prop_initiated vs tenure colored by
+ year_joined.bucket. You can bin together ranges
+ of tenure or add a smoother to the plot.
+ 
+```{r}
+library(ggplot2)
+ggplot(pf, aes(x=tenure, y=prop_initiated)) +
+  geom_line(aes(color = year_joined.bucket), stat = 'summary', fun.y = median) +
+  geom_smooth()
+```
+
+# Price/Carat Binned, Faceted, & Colored
+
+ Create a scatter plot of the price/carat ratio
+ of diamonds. The variable x should be
+ assigned to cut. The points should be colored
+ by diamond color, and the plot should be
+ faceted by clarity.
+
+ The plot should look something like this.
+ http://i.imgur.com/YzbWkHT.jpg.
+
+ Note: In the link, a color palette of type
+ 'div' was used to color the histogram using
+ scale_color_brewer(type = 'div')
+
+```{r}
+library(ggplot2)
+
+ggplot(diamonds, aes(x=cut, y=price/carat)) +
+  geom_jitter(aes(color = color)) +
+  facet_wrap(~ clarity) +
+  scale_color_brewer(type = 'div')
+```
+
+# Gapminder Multivariate Analysis
+
+ The Gapminder website contains over 500 data sets with information about
+ the world's population. Your task is to continue the investigation you did at the
+ end of Problem Set 4 or you can start fresh and choose a different
+ data set from Gapminder.
+
+ If you’re feeling adventurous or want to try some data munging see if you can
+ find a data set or scrape one from the web.
+
+ In your investigation, examine 3 or more variables and create 2-5 plots that make
+ use of the techniques from Lesson 5.
+
+ You can find a link to the Gapminder website in the Instructor Notes.
+
+ Once you've completed your investigation, create a post in the discussions that includes:
+       1. the variable(s) you investigated, your observations, and any summary statistics
+       2. snippets of code that created the plots
+       3. links to the images of your plots
+       
+## Load Gapminder data
+## Turning into tidy data
+```{r}
+library(readxl)
+library(tidyr)
+library(dplyr)
+setwd('~/desenv/udacity/dataAnalyst/part5/l8-problem_Set')
+
+life_expectancy <- read_xlsx('../l6-problem_Set/indicator life_expectancy_at_birth.xlsx') %>%
+  gather("year", "life_expect", 2:218) %>%
+  dplyr::filter(year >= 1950 & year < 2016)
+colnames(life_expectancy)[1] <- 'country'
+
+gdp_per_capta <- read_xlsx('indicator gdp_per_capita_ppp version8.xlsx') %>%
+  gather("year", "gdp_per_capta", 2:222) %>%
+  dplyr::filter(year >= 1950)
+colnames(gdp_per_capta)[1] <- 'country'
+
+median_age <- read_xlsx('indicator_median age.xlsx') %>%
+  gather("year", "median_age", 2:22) %>%
+  dplyr::filter(year < 2016)
+colnames(median_age)[1] <- 'country'
+
+population_total <- read_xlsx('indicator gapminder population.xlsx') %>%
+  gather("year", "population", 2:82) %>%
+  dplyr::filter(year >= 1950 & year < 2016)
+colnames(population_total)[1] <- 'country'
+
+gapminder <- inner_join(life_expectancy, gdp_per_capta) %>% 
+  inner_join(population_total) %>%
+  inner_join(median_age)
+```
+
+## Life expectancy is greater when GDP per capta also is greater?
+```{r}
+library(ggplot2)
+
+ggplot(gapminder, aes(x=gdp_per_capta, y=life_expect)) +
+  geom_point(aes(colour = year)) +
+  scale_x_log10() +
+  scale_color_brewer(type = 'qual', palette = 'Paired')
+```
+
+## Life expectancy versus median age across the years
+ ?????????????????????????????????????????????
+```{r}
+library(ggplot2)
+
+ggplot(gapminder, aes(x=median_age, y=life_expect)) +
+  geom_point(aes(colour = year, size = population)) +
+  scale_color_brewer(type = 'qual', palette = 'Set3')
+```
+
+
+## Life expectancy versus population_totals
+
+```{r}
+library(ggplot2)
+
+ggplot(gapminder, aes(x=population, y=life_expect)) +
+  geom_point(aes(colour = year)) +
+  scale_color_brewer(type = 'qual', palette = 'Set3')
+```

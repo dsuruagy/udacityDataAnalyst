@@ -1,0 +1,29 @@
+---
+title: "l8-gapminder"
+output: html_document
+---
+
+## Load Gapminder data
+## Turning into tidy data
+```{r}
+library(readxl)
+library(tidyr)
+library(dplyr)
+
+life_expectancy <- read_xlsx('../l6-problem_Set/indicator life_expectancy_at_birth.xlsx') %>%
+  gather("year", "life_expect", 2:218) %>%
+  dplyr::filter(year >= 1950 & year < 2016)
+colnames(life_expectancy)[1] <- 'country'
+
+gdp_per_capta <- read_xlsx('indicator gdp_per_capita_ppp version8.xlsx') %>%
+  gather("year", "gdp_per_capta", 2:222) %>%
+  dplyr::filter(year >= 1950)
+colnames(gdp_per_capta)[1] <- 'country'
+
+median_age <- read_xlsx('indicator_median age.xlsx') %>%
+  gather("year", "median_age", 2:22) %>%
+  dplyr::filter(year < 2016)
+colnames(median_age)[1] <- 'country'
+
+gapminder <- inner_join(life_expectancy, gdp_per_capta) %>% inner_join(median_age)
+```

@@ -240,12 +240,19 @@ with(subset(pf, tenure > 0), summary(friend_count / tenure))
 ### Friendships Initiated
 Notes:
 
-What is the median friend rate?
+ Create a line graph of mean of friendships_initiated per day (of tenure)
+ vs. tenure colored by year_joined.bucket.
 
-What is the maximum friend rate?
+ You need to make use of the variables tenure,
+ friendships_initiated, and year_joined.bucket.
 
+ You also need to subset the data to only consider user with at least
+ one day of tenure.
+ 
 ```{r Friendships Initiated}
-
+library(ggplot2)
+ggplot(subset(pf, tenure >=1), aes(x=tenure, y=friendships_initiated / tenure))+
+  geom_line(aes(color = year_joined.bucket), stat = 'summary', fun.y = mean)
 ```
 
 ***
@@ -280,6 +287,14 @@ ggplot(aes(x = 90 * round(tenure / 90), y = friendships_initiated / tenure),
             fun.y = mean)
 
 ```
+ Instead of geom_line(), use geom_smooth() to add a smoother to the plot.
+ You can use the defaults for geom_smooth() but do color the line
+ by year_joined.bucket
+
+```{r}
+ggplot(subset(pf, tenure >=1), aes(x=tenure, y=friendships_initiated / tenure))+
+  geom_smooth(aes(color = year_joined.bucket))
+```
 
 ***
 
@@ -290,6 +305,14 @@ Notes:
 
 ### Introducing the Yogurt Data Set
 Notes:
+```{r}
+yo <- read.csv('yogurt.csv')
+str(yo)
+
+summary(yo)
+
+yo$id <- factor(yo$id)
+```
 
 ***
 
@@ -297,7 +320,9 @@ Notes:
 Notes:
 
 ```{r Histograms Revisited}
-
+library(ggplot2)
+ggplot(yo, aes(x=price)) +
+  geom_histogram(binwidth = 10)
 ```
 
 ***
@@ -305,8 +330,20 @@ Notes:
 ### Number of Purchases
 Notes:
 
-```{r Number of Purchases}
+ Create a new variable called all.purchases,
+ which gives the total counts of yogurt for
+ each observation or household.
 
+ One way to do this is using the transform
+ function. You can look up the function transform
+ and run the examples of code at the bottom of the
+ documentation to figure out what it does.
+
+ The transform function produces a data frame
+ so if you use it then save the result to 'yo'!
+
+```{r Number of Purchases}
+yo <- transform(yo, all.purchases = strawberry + blueberry + pina.colada + plain + mixed.berry)
 ```
 
 ***
@@ -314,8 +351,20 @@ Notes:
 ### Prices over Time
 Notes:
 
-```{r Prices over Time}
+ Create a scatterplot of price vs time.
 
+ This will be an example of a time series plot.
+
+ Resolve overplotting issues by using
+ techniques you learned in Lesson 4.
+
+ What are some things that you notice?
+   Answer: The price has raised from $60 to around $70
+   
+```{r Prices over Time}
+library(ggplot2)
+ggplot(yo, aes(x=time, y=price)) +
+  geom_point(alpha=1/30)
 ```
 
 ***
@@ -328,7 +377,15 @@ Notes:
 ### Looking at Samples of Households
 
 ```{r Looking at Sample of Households}
+set.seed(3000)
+sel.household.ids <- sample(levels(yo$id), 16)
 
+library(ggplot2)  
+ggplot(data=subset(yo, id %in% sel.household.ids),
+       aes(x = time, y = price)) +
+  facet_wrap(~ id) +
+  geom_line() +
+  geom_point(aes(size = all.purchases), pch = 1)
 ```
 
 ***
@@ -347,9 +404,35 @@ Notes:
 Notes:
 
 ***
+```{r}
+#install.packages('GGally')
+library(GGally)
+#theme_set(theme_minimal(20))
+
+# set the seed for reproducible results
+set.seed(1836)
+pf_subset <- pf[, c('age', 'gender', 'friendships_initiated','friend_count','mobile_likes')]
+#pf_subset <- subset(pf, select = -c(userid, year_joined, year_joined.bucket))
+names(pf_subset)
+ggpairs(pf_subset[sample.int(nrow(pf_subset), 1000), ])
+#ggsave('scatterPlots.png')
+```
+Correlation between:
+
+- friendships_initiated and friend_count: 0.769
+- age and mobile_likes: -0.0475
 
 ### Even More Variables
 Notes:
+```{r}
+nci <- read.table('nci.tsv')
+
+# changing column names to produce a nicer plot
+colnames(nci) <- c(1:64)
+
+library(GGally)
+ggpairs(nci[sample.int(nrow(nci), 1000), ])
+```
 
 ***
 
