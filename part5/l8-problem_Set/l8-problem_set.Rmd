@@ -237,24 +237,35 @@ ggplot(gapminder, aes(x=gdp_per_capta, y=life_expect)) +
   scale_x_log10() +
   scale_color_brewer(type = 'qual', palette = 'Paired')
 ```
-
-## Life expectancy versus median age across the years
- ?????????????????????????????????????????????
+## Population grow across the years
 ```{r}
 library(ggplot2)
-
-ggplot(gapminder, aes(x=median_age, y=life_expect)) +
-  geom_point(aes(colour = year, size = population)) +
-  scale_color_brewer(type = 'qual', palette = 'Set3')
+ggplot(gapminder, aes(y=population, x=year)) +
+  geom_line(aes(group=country)) +
+  geom_smooth(method = 'gam') +
+  theme(legend.position="none") +
+  scale_y_log10()
 ```
 
 
-## Life expectancy versus population_totals
+## Median_age versus population size across, considering gdp_per_capta
+```{r}
+gapminder$gdp_bucket <- cut(gapminder$gdp_per_capta, breaks = c(260,3700,7800,10000,120000))  
+
+library(ggplot2)
+ggplot(subset(gapminder, !is.na(gdp_bucket) ), 
+       aes(x=population, y=median_age)) +
+  geom_point(aes(color=gdp_bucket)) +
+  scale_x_log10() +
+  scale_color_brewer(type = 'div')
+```
+
+
+## Life expectancy versus median_age, considering gdp and population
 
 ```{r}
 library(ggplot2)
-
-ggplot(gapminder, aes(x=population, y=life_expect)) +
-  geom_point(aes(colour = year)) +
-  scale_color_brewer(type = 'qual', palette = 'Set3')
+ggplot(subset(gapminder, !is.na(gdp_bucket) & as.numeric(year) == 2005), 
+       aes(x=median_age, y=life_expect)) +
+  geom_point(aes(color=gdp_bucket, size=population)) 
 ```
