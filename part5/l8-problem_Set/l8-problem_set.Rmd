@@ -236,6 +236,7 @@ ggplot(gapminder, aes(x=gdp_per_capta, y=life_expect)) +
   geom_point(aes(colour = year)) +
   scale_x_log10() +
   scale_color_brewer(type = 'qual', palette = 'Paired')
+ggsave('scatterLifeExpectPerGDP.png')
 ```
 ## Population grow across the years
 ```{r}
@@ -258,6 +259,7 @@ ggplot(subset(gapminder, !is.na(gdp_bucket) ),
   geom_point(aes(color=gdp_bucket)) +
   scale_x_log10() +
   scale_color_brewer(type = 'div')
+ggsave('scatterMedianAgePerPopulationGDP.png')
 ```
 
 
@@ -268,4 +270,5 @@ library(ggplot2)
 ggplot(subset(gapminder, !is.na(gdp_bucket) & as.numeric(year) == 2005), 
        aes(x=median_age, y=life_expect)) +
   geom_point(aes(color=gdp_bucket, size=population)) 
+ggsave('scatterLifeExpectPerMedianAgeWithPopulationAndGDP.png')
 ```
