@@ -29,30 +29,21 @@ Lets take a look on the variables and some of the values.
 str(wine_quality)
 ```
 
-```{r echo=FALSE, Univariate_Plots}
-ggplot(wine_quality, aes(x=quality)) +
-  geom_bar()
-
-summary(wine_quality$quality)
-```
-
-To start, I was looking forward to see how the experts had qualified the wine. 
-It is possible to identify that no wine has received the minimum or the maximum 
-grade. The grades distribution is normal, with a median of 6.
-
 ```{r echo=FALSE}
-qplot(residual.sugar, data=wine_quality)
+qplot(fixed.acidity, data=wine_quality)
 
-summary(wine_quality$residual.sugar)
+summary(wine_quality$fixed.acidity)
 ```
+Fixed acidity is composed for the tartaric acid, which is the primary acid 
+component in grapes
+(http://www.calwineries.com/learn/wine-chemistry/wine-acids/tartaric-acid), and
+influences the total acidity of wines. 
 
-```{r echo=FALSE}
-qplot(pH, data=wine_quality)
+Some values could be used as reference for white wines (http://winemaking.jackkeller.net/acid.asp)
+Dry White Grape Wines..........0.65-0.75% (6.5 - 7.5 g/L)
+Sweet White Grape Wines.......0.70-0.85% (7.0 - 8.5 g/L)
 
-summary(wine_quality$pH)
-```
-
-most wines are between 3-4 on the pH scale
+The median falls on dry white grape wines, which can be the prime wine produced.
 
 ```{r echo=FALSE}
 qplot(volatile.acidity, data=wine_quality)
@@ -60,7 +51,12 @@ qplot(volatile.acidity, data=wine_quality)
 summary(wine_quality$volatile.acidity)
 ```
 
-at too high of levels can lead to an unpleasant, vinegar taste
+(acetic acid - g / dm^3)
+. at too high of levels can lead to an unpleasant, vinegar taste.
+. A taster's sensitivity to acetic acid will vary, but most people can detect excessive amounts at around 600 mg/l (J. Robinson (ed) “The Oxford Companion to Wine” Third Edition pg 2–3 Oxford University Press 2006 ISBN 0-19-860990-6). with concentrations greater than 1.2-1.3 g/L becoming unpleasant.
+. A wine with too much acidity will taste excessively sour and sharp. A wine with too little acidity will taste flabby and flat, with less defined flavors.(same as above)
+
+**** What I expect: wines with VA > 0.6 g/L will be low evaluated.
 
 ```{r echo=FALSE}
 qplot(citric.acid, data=wine_quality)
@@ -70,11 +66,65 @@ summary(wine_quality$citric.acid)
 
 found in small quantities, citric acid can add 'freshness' and flavor to wines
 
-> **Tip**: Make sure that you leave a blank line between the start / end of
-each code block and the end / start of your Markdown text so that it is
-formatted nicely in the knitted text. Note as well that text on consecutive
-lines is treated as a single space. Make sure you have a blank line between
-your paragraphs so that they too are formatted for easy readability.
+
+```{r echo=FALSE}
+qplot(residual.sugar, data=wine_quality)
+
+# Breaks of residual sugar were obtained on 
+# https://vinepair.com/wine-blog/cheat-sheet-white-wine-sweetness-chart-guide/
+wine_quality$sweetness <- cut(wine_quality$residual.sugar, 
+                              breaks = c(0, 5, 10, 20, 30, 100),
+                              labels = c('Extra dry', 'Dry', 'Semi Dry',
+                                         'Semi Sweet', 'Sweet'))
+table(wine_quality$sweetness)
+```
+
+. Classification of sugar in wine: http://winefolly.com/review/sugar-in-wine-chart/
+. sugar to acid ration: http://drinkriesling.com/tasteprofile/thescale
+
+By the classification found on 
+https://vinepair.com/wine-blog/cheat-sheet-white-wine-sweetness-chart-guide/, 
+dry wine is the majority produced.
+
+```{r}
+qplot(chlorides, data=wine_quality)
+
+summary(wine_quality$chlorides)
+```
+
+
+
+```{r}
+qplot(total.sulfur.dioxide, data=wine_quality)
+
+#summary(wine_quality$total.sulfur.dioxide)
+```
+.In most cases compounds such as sulfur dioxide or erythorbic acid are added to wine by winemakers, which protect the wine from oxidation and also bind with some of the oxidation products to reduce their organoleptic effect.[4]
+
+```{r echo=FALSE}
+qplot(pH, data=wine_quality)
+
+summary(wine_quality$pH)
+```
+
+Like describe in http://winefolly.com/review/understanding-acidity-in-wine/, 
+a pH of 3 is caracteristic for a sweet white, while 3.1 is for light-bodied 
+white wines. The median is very near these values.
+
+
+```{r echo=FALSE, Univariate_Plots}
+ggplot(wine_quality, aes(x=quality)) +
+  geom_bar()
+
+summary(wine_quality$quality)
+```
+
+To finish, I was looking forward to see how the experts had qualified the wine. 
+It is possible to identify that no wine has received the minimum or the maximum 
+grade. The grades distribution is normal, with a median of 6.
+
+I wonder why most of wines received a grade of 5 or 6. What chemical 
+characteristics could explain these grades?
 
 # Univariate Analysis
 
