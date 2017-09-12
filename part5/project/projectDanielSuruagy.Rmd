@@ -4,6 +4,7 @@ Prosper Loan by Daniel R. S. Monteiro
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
 # Load all packages
 library(ggplot2)
+library(GGally)
 ```
 
 ```{r echo=FALSE, Load_the_Data}
@@ -70,6 +71,10 @@ found in small quantities, citric acid can add 'freshness' and flavor to wines
 ```{r echo=FALSE}
 qplot(residual.sugar, data=wine_quality)
 
+ggplot(wine_quality, aes(x=residual.sugar)) +
+  geom_histogram() +
+  scale_x_log10(breaks=c(5, 10, 20, 30)) 
+
 # Breaks of residual sugar were obtained on 
 # https://vinepair.com/wine-blog/cheat-sheet-white-wine-sweetness-chart-guide/
 wine_quality$sweetness <- cut(wine_quality$residual.sugar, 
@@ -88,6 +93,7 @@ dry wine is the majority produced.
 
 ```{r}
 qplot(chlorides, data=wine_quality)
+
 
 summary(wine_quality$chlorides)
 ```
@@ -128,23 +134,36 @@ characteristics could explain these grades?
 
 # Univariate Analysis
 
-> **Tip**: Now that you've completed your univariate explorations, it's time to
-reflect on and summarize what you've found. Use the questions below to help you
-gather your observations and add your own if you have other thoughts!
-
 ### What is the structure of your dataset?
+
+This dataset contains 4898 observations, well structured on tidy data, with 12
+variables. Some characteristics of this dataset:
+
+. Most wines are graded with 6.
+. Most of them are extra dry or dry, accordingly with classification of
+residual sugar.
+. Fixed and volatile acidity and pH are inside what could be expected for white
+wines.
 
 ### What is/are the main feature(s) of interest in your dataset?
 
-### What other features in the dataset do you think will help support your \
+I think the main features are fixed.acidity, residual.sugar, pH
+and quality.
+
+### What other features in the dataset do you think will help support your \ 
 investigation into your feature(s) of interest?
 
+Others that could be of interest are volatile.acidity, chlorides and total.sulfur.dioxide.
+
 ### Did you create any new variables from existing variables in the dataset?
+
+Yes, like wine sweetness classification, based on residual sugar.
 
 ### Of the features you investigated, were there any unusual distributions? \
 Did you perform any operations on the data to tidy, adjust, or change the form \
 of the data? If so, why did you do this?
 
+Residual sugar plot could be more easily seen when applying a log 10 transformation, which reveals a bimodal distribution.
 
 # Bivariate Plots Section
 
@@ -155,7 +174,31 @@ supporting variables. Try to look at relationships between supporting variables
 as well.
 
 ```{r echo=FALSE, Bivariate_Plots}
+ggpairs(data=wine_quality, 
+        columns = c("fixed.acidity", "volatile.acidity", "citric.acid",
+                    "residual.sugar",  "chlorides", "free.sulfur.dioxide",
+                    "total.sulfur.dioxide", "density", "pH", "sulphates", 
+                    "alcohol", "quality"))
+```
 
+Selected plots: 
+.pH x fixed.acidity
+.alcohol x residual.sugar
+.alcohol x quality
+.fixed.acidity x quality
+.density x quality
+.chlorides x quality
+.residual.sugar x density
+.
+```{r echo=FALSE}
+ggplot(wine_quality, aes(x=quality, y=fixed.acidity)) +
+  geom_jitter(alpha=1/20)
+
+ggplot(wine_quality, aes(x=quality, y=density)) +
+  geom_jitter(alpha=1/10)
+
+ggplot(wine_quality, aes(x=quality, y=alcohol)) +
+  geom_jitter(alpha=1/10)
 ```
 
 # Bivariate Analysis
