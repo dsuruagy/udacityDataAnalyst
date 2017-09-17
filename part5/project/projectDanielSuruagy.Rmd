@@ -5,16 +5,14 @@ Prosper Loan by Daniel R. S. Monteiro
 # Load all packages
 library(ggplot2)
 library(gridExtra)
-#library(GGally)
-#library(PerformanceAnalytics)
 library(corrr)
 library(corrplot)
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
-# Load the Data
+# Load data
 setwd('/home/daniel/dataAnalyst/part5/project')
-wine_quality <- read.csv('wineQualityWhites.csv')
+white_wines <- read.csv('wineQualityWhites.csv')
 ```
 
 In this document, I will investigate some data from white wines produced by 
@@ -24,36 +22,34 @@ a study conducted on University of Minho, at 2009.
 There are 11 input variables, with chemical characteristics of these wines, and 1 
 output variable that indicates a wine expert evaluation of the quality of the samples.
 
-
-
 # Univariate Plots Section
 
 Lets take a look on the variables and some of the values.
 
 ```{r echo=FALSE, Univariate_visualization}
-str(wine_quality)
+str(white_wines)
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-qplot(fixed.acidity, data=wine_quality)
+qplot(fixed.acidity, data=white_wines)
 
-summary(wine_quality$fixed.acidity)
+summary(white_wines$fixed.acidity)
 ```
 Fixed acidity is composed for the tartaric acid, which is the primary acid 
-component in grapes
-(http://www.calwineries.com/learn/wine-chemistry/wine-acids/tartaric-acid), and
-influences the total acidity of wines. 
+component in grapes [1], and influences the total acidity of wines. 
 
-Some values could be used as reference for white wines (http://winemaking.jackkeller.net/acid.asp)
-Dry White Grape Wines..........0.65-0.75% (6.5 - 7.5 g/L)
-Sweet White Grape Wines.......0.70-0.85% (7.0 - 8.5 g/L)
+As a reference form white wines, we could use the values below: [2]
 
-The median falls on dry white grape wines, which can be the prime wine produced.
+* Dry White Grape Wines 0.65-0.75% (6.5 - 7.5 g/L)
+* Sweet White Grape Wines 0.70-0.85% (7.0 - 8.5 g/L)
+
+Using these values, we could identify that the median is in the dry white grape 
+wines interval, which seems to be the main wine produced.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-qplot(volatile.acidity, data=wine_quality)
+qplot(volatile.acidity, data=white_wines)
 
-summary(wine_quality$volatile.acidity)
+summary(white_wines$volatile.acidity)
 ```
 
 (acetic acid - g / dm^3)
@@ -64,73 +60,73 @@ summary(wine_quality$volatile.acidity)
 **** What I expect: wines with VA > 0.6 g/L will be low evaluated.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-qplot(citric.acid, data=wine_quality)
+qplot(citric.acid, data=white_wines)
 
-summary(wine_quality$citric.acid)
+summary(white_wines$citric.acid)
 ```
 
 found in small quantities, citric acid can add 'freshness' and flavor to wines
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-qplot(residual.sugar, data=wine_quality)
+qplot(residual.sugar, data=white_wines)
 
-ggplot(wine_quality, aes(x=residual.sugar)) +
+ggplot(white_wines, aes(x=residual.sugar)) +
   geom_histogram() +
   scale_x_log10(breaks=c(5, 10, 20, 30)) 
 
-# Breaks of residual sugar were obtained on 
-# https://vinepair.com/wine-blog/cheat-sheet-white-wine-sweetness-chart-guide/
-#wine_quality$sweetness <- cut(wine_quality$residual.sugar, 
-#                              breaks = c(0, 5, 10, 20, 30, 100),
-#                              labels = c('Extra dry', 'Dry', 'Semi Dry',
-#                                         'Semi Sweet', 'Sweet'))
-#table(wine_quality$sweetness)
 ```
 
-. Classification of sugar in wine: http://winefolly.com/review/sugar-in-wine-chart/
-. sugar to acid ration: http://drinkriesling.com/tasteprofile/thescale
 
-By the classification found on 
-https://vinepair.com/wine-blog/cheat-sheet-white-wine-sweetness-chart-guide/, 
-dry wine is the majority produced.
+By the classification found on [3], dry wine is the majority produced, because
+most of the values falls below 10 g/L.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-qplot(chlorides, data=wine_quality)
+qplot(chlorides, data=white_wines)
 
-summary(wine_quality$chlorides)
+summary(white_wines$chlorides)
 ```
 
-
+MISSING !!!!!!!!!!!!!!!
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-qplot(total.sulfur.dioxide, data=wine_quality)
+qplot(total.sulfur.dioxide, data=white_wines)
 
-#summary(wine_quality$total.sulfur.dioxide)
+#summary(white_wines$total.sulfur.dioxide)
 ```
+
+.It is used as a preservative because of its anti-oxidative and anti-microbial properties in wine, but also as a cleaning agent for barrels and winery facilities.
 .In most cases compounds such as sulfur dioxide or erythorbic acid are added to wine by winemakers, which protect the wine from oxidation and also bind with some of the oxidation products to reduce their organoleptic effect.[4]
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-qplot(pH, data=wine_quality)
+```{r}
+qplot(density, data=white_wines)
 
-summary(wine_quality$pH)
+summary(white_wines$density)
 ```
 
-Like describe in http://winefolly.com/review/understanding-acidity-in-wine/, 
-a pH of 3 is caracteristic for a sweet white, while 3.1 is for light-bodied 
-white wines. The median is very near these values.
+Density of wines in this sample has a median of 0.9937 g/mL, which is very
+close to water density, which has a value of 0.9970 g/mL [8]. Alcohol and sugar
+can influence density values.
 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+qplot(pH, data=white_wines)
+
+summary(white_wines$pH)
+```
+
+Like described in [4], a pH of 3 is caracteristic for a sweet white, while 3.1 
+is for light-bodied white wines. The median is very near these values.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots}
-ggplot(wine_quality, aes(x=quality)) +
+ggplot(white_wines, aes(x=quality)) +
   geom_bar()
 
-summary(wine_quality$quality)
+summary(white_wines$quality)
 ```
 
-To finish, I was looking forward to see how the experts had qualified the wine. 
-It is possible to identify that no wine has received the minimum or the maximum 
-grade. The grades distribution is normal, with a median of 6.
+Finally, I was looking forward to see how the experts had qualified these 
+wines. We can identify that no wine has received the minimum or the maximum 
+grades. This distribution is normal, with a median of 6.
 
 I wonder why most of wines received a grade of 5 or 6. What chemical 
 characteristics could explain these grades?
@@ -142,14 +138,11 @@ characteristics could explain these grades?
 This dataset contains 4,898 observations, well structured on tidy data, with 12
 variables. Some characteristics of this dataset:
 
-. Most wines are graded with 6.
-. Most of them are extra dry or dry, accordingly with classification of
-residual sugar.
-. Fixed and volatile acidity and pH are inside what could be expected for white
+* Most wines are graded with 6.
+* Most of them are classified as extra dry or dry, accordingly with the 
+classification of sweetness, based on residual sugar quantities.
+* Fixed and volatile acidity and pH are inside what could be expected for white
 wines.
-
-ORIGINAL DESCRIPTION:
-This tidy data set contains 4,898 white wines with 11 variables on quantifying the chemical properties of each wine. At least 3 wine experts rated the quality of each wine, providing a rating between 0 (very bad) and 10 (very excellent).
 
 ### What is/are the main feature(s) of interest in your dataset?
 
@@ -159,7 +152,8 @@ and quality.
 ### What other features in the dataset do you think will help support your \ 
 investigation into your feature(s) of interest?
 
-Others that could be of interest are volatile.acidity, chlorides and total.sulfur.dioxide.
+Others that could be of interest are volatile.acidity, chlorides and 
+total.sulfur.dioxide.
 
 ### Did you create any new variables from existing variables in the dataset?
 
@@ -179,96 +173,126 @@ yourself to relationships between a main output feature and one of the
 supporting variables. Try to look at relationships between supporting variables
 as well.
 
+Although some of the variables could be seem in the univariate section, I think
+is difficult to find relationships between them. So, it is important to look at
+a these correlations to identify what need to be analysed on this section.
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# Used for reference: http://jamesmarquezportfolio.com/correlation_matrices_in_r.html
-
-# PerformanceAnalytics:
-#chart.Correlation(wine_quality[, 1:13], histogram=TRUE, pch=19)
-network_plot(correlate(wine_quality), min_cor=0.2, legend = TRUE)
-
-corrplot.mixed(cor(wine_quality), order="hclust", tl.col="black")
-
+network_plot(correlate(white_wines), min_cor=0.2, legend = TRUE)
 ```
 
+I find interesting to see that correlations on a different way, like this
+network plot shown above, where correlation is shown in the form of lines between
+them. The stronger the relationship, the darker is the color, which is red for
+negative and blue for positive values.
+
+It is possible to identify some variables that have more relationships than
+others like density, alcohol, total.sulfur.dioxide and quality.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Used for reference: [5]
+corrplot.mixed(cor(white_wines), order="hclust", tl.col="black")
+```
+
+Another way to visualize is with a correlation matrix like above. Here is
+possible to quantify the variables relationships listed early.
+
+These variables serve as a start point for the bivariate analysis presented
+below.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_density}
-p_sugar <- ggplot(wine_quality, aes(x=residual.sugar, y=density)) +
-  geom_point(alpha=0.1) 
+p_sugar <- ggplot(white_wines, aes(x=residual.sugar, y=density)) +
+  geom_point(alpha=0.1) + 
+  geom_smooth(method='lm')
 
-p_alcohol <- ggplot(wine_quality, aes(x=alcohol, y=density)) +
+p_alcohol <- ggplot(white_wines, aes(x=alcohol, y=density)) +
   geom_point(alpha=0.1) + ylab(NULL) +
-  scale_y_continuous(labels = NULL)
+  scale_y_continuous(labels = NULL) + 
+  geom_smooth(method='lm')
 
-p_sulfur <- ggplot(wine_quality, aes(x=total.sulfur.dioxide, y=density)) +
+p_sulfur <- ggplot(white_wines, aes(x=total.sulfur.dioxide, y=density)) +
   geom_point(alpha=0.1) + ylab(NULL) +
-  scale_y_continuous(labels = NULL)
+  scale_y_continuous(labels = NULL) + 
+  geom_smooth(method='lm')
 
 grid.arrange(p_sugar, p_alcohol, p_sulfur, ncol=3)
+
+mod1 <- lm(white_wines$density ~ white_wines$residual.sugar)
+summary(mod1)
 ```
 
 The stronger relationships between variables involves density.
 
 The first of them is found on density per residual sugar. Is it possible to 
-perceive a positive correlation, which corresponds to 0.84.
+perceive a positive correlation, which corresponds to 0.84. In fact, residual
+sugar explains 70% of density, based on the value of R².
 
-Next stronger correlation is density per alcohol, with a value of negative 0.76.
+Next stronger correlation is density per alcohol, with a value of negative
+0.76. Finally, total.sulfur.dioxide has a positive correlation with density,
+with a value of positive 0.62.
 
-Finally, total.sulfur.dioxide has a positive correlation with density, with a value of positive 0.62.
+It's possible to see like alcohol relates with other variables:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_alcohol}
-p_alc_sulfur <- ggplot(wine_quality, aes(x=alcohol, y=total.sulfur.dioxide)) +
-  geom_jitter(alpha=0.1) + xlab(NULL)  +
-  scale_x_continuous(labels = NULL) +
-  geom_smooth(method='lm')
-
-p_alc_sugar <- ggplot(wine_quality, aes(x=alcohol, y=residual.sugar)) +
-  geom_jitter(alpha=0.1) + xlab(NULL) +
-  scale_x_continuous(labels = NULL) +
-  geom_smooth(method='lm')
-
-p_alc_chloride <- ggplot(wine_quality, aes(x=alcohol, y=chlorides)) +
-  geom_jitter(alpha=0.1) +
-  geom_smooth(method='lm')
-
-grid.arrange(p_alc_sulfur, p_alc_sugar, p_alc_chloride, ncol=1)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(white_wines, aes(x=alcohol, y=total.sulfur.dioxide)) +
+  geom_jitter(alpha=0.1) + 
+  geom_smooth()
 ```
 
-These relationships are related to alcohol. Here, when increasing its quantity,
-reflects on lowering total.sulfur.dioxide, residual.sugar and chlorides, 
-respectively.
+Here is possible to see a trick used by winemakers: the lower the pH and the 
+higher the alcohol, the less SO2 (total sulfur dioxide) a wine needs because of
+their anti-oxidative and anti-microbial properties [6].
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(white_wines, aes(x=alcohol, y=residual.sugar)) +
+  geom_jitter(alpha=0.1) + 
+  scale_y_log10() +
+  geom_smooth()
+```
+
+Sugar is transformed into alcohol, during fermentation. In dry wines, almost
+all sugar was transformed into alcohol. In sweet wines, the yeasts were killed
+before all sugar was consumed, leaving residual sugar [7]. The plot above shows
+that there is less sugar, when alcohol values are greater, as expected.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(white_wines, aes(x=alcohol, y=chlorides)) +
+  geom_jitter(alpha=0.1) +
+  scale_y_log10() +
+  geom_smooth()
+```
+
+Here, the variance of chlorides is very small. Somehow, there are less
+chlorides when ther is more alcohol.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_pH}
 #pH x fixed.acidity
-ggplot(wine_quality, aes(x=fixed.acidity, y=pH)) +
-  geom_jitter(alpha=0.3)
+ggplot(white_wines, aes(x=fixed.acidity, y=pH)) +
+  geom_jitter(alpha=0.1) +
+  geom_smooth(method='lm')
 ```
 
-It is known that lower values of pH indicates more acidity, and it is what can
-be seen when comparing pH per fixed.acidity, with a negative correlation.
+It is known that lower values of pH indicates more acidity of substances, and
+it is what can be seen when comparing pH per fixed.acidity, with a negative
+correlation.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-wine_quality$quality <- factor(wine_quality$quality)
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_pH}
+p_pH_SO2 <- ggplot(white_wines, aes(x=total.sulfur.dioxide, y=pH)) +
+  geom_jitter(alpha=0.1) +
+  geom_smooth(method='lm')
 
-ggplot(wine_quality, aes(x=quality, y=volatile.acidity)) +
-  geom_boxplot() + 
-  coord_cartesian(ylim=c(0.15, 0.5))
+p_pH_fSO2 <- ggplot(white_wines, aes(x=free.sulfur.dioxide, y=pH)) +
+  geom_jitter(alpha=0.1) +
+  scale_x_log10() +
+  geom_smooth(method='lm')
 
-ggplot(wine_quality, aes(x=quality, y=chlorides)) +
-  geom_boxplot() + 
-  coord_cartesian(ylim=c(0.0, 0.1))
-
-ggplot(wine_quality, aes(x=quality, y=density)) +
-  geom_boxplot() + 
-  coord_cartesian(ylim=c(0.985, 1.005))
-
-ggplot(wine_quality, aes(x=quality, y=alcohol)) +
-  geom_boxplot()
-
-ggplot(wine_quality, aes(x=quality, y=alcohol)) +
-  geom_violin()
-
-by(wine_quality$alcohol, wine_quality$quality, summary)
+grid.arrange(p_pH_SO2, p_pH_fSO2, ncol=2)
 ```
+
+Here it is expected that the higher the PH, the higher the total amount of SO² 
+in molecular form [10]. However, it is not presented in this dataset, where 
+there is no relationship between them.
+
 
 Which variables could influence quality? Many of them, because wine quality can
 be very subjective for the specialists. It depends on a combination of acidity,
@@ -276,26 +300,67 @@ sweetness, color, aroma and many other aspects. Here, I analyse the variables
 that appear to be more correlated with quality: chloride, volatile acidity, 
 density and alcohol.
 
-It is important to note that these are weak correlations. Many values are present
-in all quality grades and it is necessary to analyse the frequency of values 
-which appear more on the grades, but it is not garanteed to be meaningful.
+It is important to note that these are weak correlations. Many values are
+present in all quality grades and it is necessary to analyse the frequency of
+values which appear more on the grades, but it is not garanteed to be
+meaningful.
 
-I think the weakest of them is volatile acidity per quality, with a value of -0.19.
-Median values for volatile acidity of wines that received quality grade 3 is not
-so different to those that received grade 8 or 9.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+white_wines$quality <- factor(white_wines$quality)
+
+ggplot(white_wines, aes(x=quality, y=volatile.acidity)) +
+  geom_boxplot() + 
+  coord_cartesian(ylim=c(0.15, 0.5))
+
+by(white_wines$volatile.acidity, white_wines$quality, summary)
+```
+
+I think the weakest of them is volatile acidity per quality, with a value of
+-0.19. Median values for volatile acidity of wines that received quality grade
+3 is not so different to those that received grade 8 or 9.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(white_wines, aes(x=quality, y=chlorides)) +
+  geom_boxplot() + 
+  coord_cartesian(ylim=c(0.0, 0.1))
+
+by(white_wines$chlorides, white_wines$quality, summary)
+```
 
 A few better is the relationship between chlorides and quality (-0.21). Less
 chlorides seems to correspond to better wine quality, but the differences are 
 very small and it is not possible to see significant difference between the
 quantities for quality 3 or 6, for example.
 
-Except for quality grade 5, the relationship between density and quality seems to
-be more clear. Higher grades were assigned for less dense wines.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(white_wines, aes(x=quality, y=density)) +
+  geom_boxplot() + 
+  coord_cartesian(ylim=c(0.985, 1.005))
 
-Alcohol has the highest correlation with quality, with a value 0.44. As oposite to 
-density, like seen in the plot of these relationships, the higher the alcohol 
-median value, the higher the grade. These can be seen on the violin plot, which 
-surprisingly present a cup of wine for the highest grade!
+by(white_wines$density, white_wines$quality, summary)
+```
+
+Except for quality grade 5, the relationship between density and quality seems
+to be more clear. Higher grades were assigned for less dense wines.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(white_wines, aes(x=quality, y=alcohol)) +
+  geom_boxplot()
+
+ggplot(white_wines, aes(x=quality, y=alcohol)) +
+  geom_violin()
+
+by(white_wines$alcohol, white_wines$quality, summary)
+
+
+```
+
+Alcohol has the highest correlation with quality, with a value 0.44. As oposite
+to density, like seen in the plot of these relationships, the higher the
+alcohol median value, the higher the grade. These can be seen on the violin
+plot, which surprisingly present a cup of wine for the highest grade!
+
+
 
 # Bivariate Analysis
 
@@ -306,11 +371,36 @@ here. Use the questions below to guide your discussion.
 investigation. How did the feature(s) of interest vary with other features in \
 the dataset?
 
+There are a few outliers seen on the alcohol plots. On the correlation matrix, 
+density presents the higher coeficient of correlation with other variables.
+
+I found interesting some of the interconnected relationships, like density per
+residual sugar (positive coeficient of correlation - r), density per alcohol 
+(negative r) and residual sugar per alcohol (negative r). How can be saw, they
+are inverse linear relationship, because while residual sugar and density 
+decreases, alcohol increases.
+
+By this analysis is possible to identify a weak correlation between Quality and
+chlorides, density and alcohol. Interestingly, none of them seems to have 
+stronger relationship with main wine characteristics, like sweetness, acidity,
+tannin, fruit or body [9].
+
 ### Did you observe any interesting relationships between the other features \
 (not the main feature(s) of interest)?
 
+The correlation between pH and fixed.acidity was observed on a plot. However, 
+I expected to see a stronger relationship between them, because it's known that
+pH is a measure of the strength and concentration of the dissociated acids 
+present in wine [10], but the variance is high. 
+
+However, it is interesting to note that the relationship between pH and SO² is 
+not stronger like I expected.
+
 ### What was the strongest relationship you found?
 
+Density per residual sugar is the strongest relationship, with a coeficient of
+correlation of +0.84. The R² shows that residual sugar explains 70% of density
+values.
 
 # Multivariate Plots Section
 
@@ -320,6 +410,16 @@ more complex interactions between variables. Make sure that the plots that you
 create here are justified by the plots you explored in the previous section. If
 you plan on creating any mathematical models, this is the section where you
 will do that.
+
+```{r}
+# Breaks of residual sugar were obtained on [3]
+white_wines$sweetness <- cut(white_wines$residual.sugar, 
+                              breaks = c(0, 5, 10, 20, 30, 100),
+                              labels = c('Extra dry', 'Dry', 'Semi Dry',
+                                         'Semi Sweet', 'Sweet'))
+table(white_wines$sweetness)
+
+```
 
 #```{r echo=FALSE, Multivariate_Plots}
 
