@@ -7,6 +7,7 @@ library(ggplot2)
 library(gridExtra)
 library(corrr)
 library(corrplot)
+library(RColorBrewer)
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
@@ -228,8 +229,8 @@ perceive a positive correlation, which corresponds to 0.84. In fact, residual
 sugar explains 70% of density, based on the value of R².
 
 Next stronger correlation is density per alcohol, with a value of negative
-0.76. Finally, total.sulfur.dioxide has a positive correlation with density,
-with a value of positive 0.62.
+0.76. Finally, total.sulfur.dioxide has a positive correlation with
+density, with a value of positive 0.62.
 
 It's possible to see like alcohol relates with other variables:
 
@@ -289,7 +290,7 @@ p_pH_fSO2 <- ggplot(white_wines, aes(x=free.sulfur.dioxide, y=pH)) +
 grid.arrange(p_pH_SO2, p_pH_fSO2, ncol=2)
 ```
 
-Here it is expected that the higher the PH, the higher the total amount of SO² 
+Here I expected that the higher the PH, the higher the total amount of SO² 
 in molecular form [10]. However, it is not presented in this dataset, where 
 there is no relationship between them.
 
@@ -411,19 +412,63 @@ create here are justified by the plots you explored in the previous section. If
 you plan on creating any mathematical models, this is the section where you
 will do that.
 
-```{r}
-# Breaks of residual sugar were obtained on [3]
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(white_wines, aes(x=residual.sugar, y=density)) +
+  geom_point(aes(colour=quality)) +
+  scale_color_brewer(type = "seq", palette = "YlOrRd") +
+  coord_cartesian(xlim = c(0, 25), ylim = c(0.988, 1.005)) 
+```
+
+The quantity of residual sugar seems to have no influence on grades, as seen 
+above. Lower densities received better grades, no matter the residual sugar 
+values.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Breaks of residual sugar based on one classification [3]
 white_wines$sweetness <- cut(white_wines$residual.sugar, 
                               breaks = c(0, 5, 10, 20, 30, 100),
                               labels = c('Extra dry', 'Dry', 'Semi Dry',
                                          'Semi Sweet', 'Sweet'))
-table(white_wines$sweetness)
 
+ggplot(white_wines, aes(y = density, x = total.sulfur.dioxide)) +
+  geom_point(aes(colour=sweetness)) +
+  scale_color_brewer(type = "seq", palette = "PuRd", direction = -1) +
+  coord_cartesian(ylim=c(0.985, 1.005)) + 
+  scale_x_log10()
+  
 ```
 
-#```{r echo=FALSE, Multivariate_Plots}
+Based on one of sweetness classification, like described on [3], it is possible
+to see that drier wines are less dense. 
 
-#```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(white_wines, aes(y = density, x = chlorides)) +
+  geom_point(aes(colour=quality)) +
+  scale_color_brewer(type = "seq", palette = "YlOrRd") +
+  scale_x_log10() +
+  coord_cartesian(ylim = c(0.985, 1.005))
+```
+
+The darker colors of the higher grades, appear on the lower left part of this
+plot, where the values for chlorides and density are lower. Because there are
+fewer grades above 7 than lower, it is difficult to see a pattern here.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(white_wines, aes(x=alcohol, y=density)) +
+  geom_point(aes(colour=quality)) +
+  scale_color_brewer(type = "seq", palette = "YlGnBu") +
+  coord_cartesian(ylim=c(0.985, 1.005))
+```
+
+Like saw before, it is expected that better quality grades appear where density
+is lower and alcohol quantity is greater.
+
+```{r echo=FALSE, Multivariate_Plots}
+
+```
 
 # Multivariate Analysis
 
