@@ -1,0 +1,14 @@
+[1] http://www.calwineries.com/learn/wine-chemistry/wine-acids/tartaric-acid
+[2] http://winemaking.jackkeller.net/acid.asp
+[3] https://vinepair.com/wine-blog/cheat-sheet-white-wine-sweetness-chart-guide/
+[4] http://winefolly.com/review/understanding-acidity-in-wine/
+[5] http://jamesmarquezportfolio.com/correlation_matrices_in_r.html
+[6] https://winobrothers.com/2011/10/11/sulfur-dioxide-so2-in-wine/
+[7] http://www.calwineries.com/learn/wine-chemistry/sugar-in-wine
+[8] https://en.wikipedia.org/wiki/Properties_of_water
+[9] http://winefolly.com/review/wine-characteristics/
+[10] https://www.awri.com.au/industry_support/winemaking_resources/frequently_asked_questions/acidity_and_ph/
+[11] https://winemakermag.com/547-phiguring-out-ph
+
+. Classification of sugar in wine: http://winefolly.com/review/sugar-in-wine-chart/
+. sugar to acid ration: http://drinkriesling.com/tasteprofile/thescale
