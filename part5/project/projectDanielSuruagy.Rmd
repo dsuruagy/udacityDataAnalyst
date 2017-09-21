@@ -118,6 +118,16 @@ summary(white_wines$pH)
 Like described in [4], a pH of 3 is caracteristic for a sweet white, while 3.1 
 is for light-bodied white wines. The median is very near these values.
 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots}
+qplot(alcohol, data=white_wines)
+
+summary(white_wines$alcohol)
+```
+
+Alcohol content in wines can be in the range of 5.5% to 23% [12]. In this 
+sample, they fall in the 8% to 14.2%.
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots}
 ggplot(white_wines, aes(x=quality)) +
   geom_bar()
@@ -295,6 +305,14 @@ Here I expected that the higher the pH, more SO² would be present in the
 molecular form [10], because when pH increases, free SO2 loses effectiveness, 
 and more sulfite is needed to protect the wine [11]. However, this dataset does
 not shows relationship between them.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(white_wines, aes(y = total.sulfur.dioxide, x = free.sulfur.dioxide)) +
+  geom_jitter(alpha = 0.1) +
+  geom_smooth(method = 'lm')
+```
+As expected, because theser variables names tells everything about their high
+correlation, the free sulfur correlates with the total sulfur dioxide quantity.
 
 
 Which variables could influence quality? Many of them, because wine quality can
@@ -509,23 +527,49 @@ white_wines$pH_levels <- cut(white_wines$pH,
                              breaks = c(2.7, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.7, 4))
 
 ggplot(white_wines, aes(y = fixed.acidity, x = free.sulfur.dioxide)) +
-  geom_point(aes(colour=pH_levels)) +
+  geom_point(aes(colour = pH_levels)) +
   scale_color_brewer(type = "seq", palette = "Reds", direction = -1) +
   coord_cartesian(ylim = c(3, 12), xlim = c(0, 100))  +
   theme_dark()
 ```
 
 Here I was really expecting that with higher fixed (tartaric) acidity, the pH
-would be lower and the amount of SO² also would be lower. But again, I could
-not perceive relationship between higher quantities of SO² when there is a 
-higher pH. I wonder why this winemaker was not worried about loss of 
+would be lower as the amount of SO² used. But again, I could not perceive 
+relationship between higher quantities of SO² when there is a higher pH. I
+wonder why this winemaker does not seems to be worried about loss of
 effectiveness of SO² when the pH is high.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Breaks of residual sugar based on one classification [3]
+white_wines$alcohol_levels <- cut(white_wines$alcohol, 
+                              breaks = c(5, 10, 11.5, 13.5, 15, 21),
+                              labels = c('Low', 'Medium-Low', 'Medium',
+                                         'Medium-High', 'High'))
+
+multi_plot_4 <- ggplot(white_wines, aes(y = total.sulfur.dioxide, x = density)) +
+  geom_point(aes(colour = alcohol_levels)) +
+  scale_color_brewer(type = "seq") +
+  coord_cartesian(ylim = c(0, 300), xlim = c(0.985, 1.005))  +
+  theme_dark()
+
+multi_plot_4
+
+multi_plot_4 + facet_wrap(~ alcohol_levels)
+```
+
+Alcohol variable correlates well with total SO² and density variables. 
+There is a interesting visualization of high levels of alcohol for low
+quantities of total SO² and low density.
 
 # Multivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the \
 investigation. Were there features that strengthened each other in terms of \
 looking at your feature(s) of interest?
+
+The multivariate plots provides another way to see what could be observed on
+bivariate analysis: the stronger relationship between density and residual 
+sugar. I've tried to relate the most 
 
 ### Were there any interesting or surprising interactions between features?
 
