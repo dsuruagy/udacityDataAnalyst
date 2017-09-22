@@ -379,8 +379,7 @@ by(white_wines$alcohol, white_wines$quality, summary)
 
 Alcohol has the highest correlation with quality, with a value 0.44. As oposite
 to density, like seen in the plot of these relationships, the higher the
-alcohol median value, the higher the score. These can be seen on the violin
-plot, which surprisingly present a cup of wine for the highest score!
+alcohol median value, the higher the score. 
 
 
 
@@ -621,21 +620,36 @@ are not determinant on most web contents I've researched.
 
 ### Plot Two
 ```{r echo=FALSE, Plot_Two}
-bi_plot + geom_boxplot()
-
-bi_plot + geom_violin()
+bi_plot + geom_violin(aes(fill = quality)) +
+  theme(legend.position="none") +
+  scale_fill_brewer(type = "seq", palette = "YlOrBr", direction = -1) +
+  labs(x = "Quality score", y= "Alcohol (% by volume)", 
+       title = "Alcohol volume by quality scores")
 ```
 
 ### Description Two
-
+This violin plot give information about the strongest relationship that 
+involves the quality score variable. Most of wines that receives scores lower
+than 6 have alcohol values less than 11%, while most of those which receive 
+score above 8 has alcohol values above 12%. I think it's nice too because it
+surprisingly shows a cup of wine for the highest score!
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
-multi_plot_4
+multi_plot_4 +
+  labs(x = "Density (g / cm³)", y= "Total sulfur dioxide (mg / dm³)", 
+       title = "Total SO² per density and alcohol levels", 
+       colour = "Alcohol levels")
 ```
 
 ### Description Three
-
+In this visualization it's possible to see three variables that have relatively
+strong relationship in this dataset. Density and alcohol are those that have
+greater influence on quality. Total sulfur dioxide correlates well with them.
+It's nice to see that most wines have low levels of alcohol, and high levels of
+density and total SO². Those wines which have medium-high level of alcohol, have 
+low values of density and are the ones most well evaluated by experts. Here we 
+can see that they have less quantities of total SO² too.
 ------
 
 # Reflection
