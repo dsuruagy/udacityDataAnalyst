@@ -1,4 +1,4 @@
-Prosper Loan by Daniel R. S. Monteiro
+White wine quality by Daniel R. S. Monteiro
 ========================================================
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
@@ -70,6 +70,7 @@ ggplot(white_wines, aes(x = residual.sugar)) +
   geom_histogram() +
   scale_x_log10(breaks = c(5, 10, 20, 30)) 
 ```
+
 Residual sugar, resultant of the fermentation of wine, where not all sugar was
 metabolized by yeasts to generate alcohol [7]. Using some classification [3], 
 we can find that dry wine is the type most produced, because most values are 
@@ -428,7 +429,8 @@ by(white_wines$density / white_wines$residual.sugar,
    white_wines$quality, summary)
 ```
 
-Unfortunately, I found nothing interesting in this plot.
+There is nothing of significance in this plot. So I decided to view plots 
+using at least three correlated variables.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 multi_plot_1 <- ggplot(white_wines, aes(x = residual.sugar, y = density)) +
@@ -444,14 +446,14 @@ multi_plot_1 + facet_wrap(~ quality)
 
 ```
 
-The quantity of residual sugar does not have strong influence on scores. 
-scores above 8 are given to wines with lower densities and less sugar, but it
-can happen with score 6 also, were falls great part of data. I could not identify
-a relevant pattern here.
+The quantity of residual sugar does not have influence on these wine 
+evaluations. Scores above 8 are given to wines with lower densities and less
+sugar, but it can happen with score 6 also. I could not identify a relevant 
+pattern here.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 multi_plot_2 <- ggplot(white_wines, aes(y = density, x = chlorides)) +
-  geom_point(aes(colour=quality)) +
+  geom_point(aes(colour = quality)) +
   scale_color_brewer(type = "seq", palette = "YlOrRd") +
   scale_x_log10() +
   coord_cartesian(ylim = c(0.985, 1.005)) +
@@ -462,10 +464,10 @@ multi_plot_2
 multi_plot_2 + facet_wrap(~ quality) 
 ```
 
-Another weak correlation could be verified here. The darker colors of the higher
+Another weak correlation can be verified here. The darker colors of the higher
 scores, appear on the lower left part of this plot, where the values for
-chlorides and density are lower. Because there are fewer scores above 8 than 
-lower, it is also difficult to find a pattern here.
+chlorides and density are lower. Because there are fewer wines with scores 
+above 8, it is also difficult to find a pattern here.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Breaks of residual sugar based on one classification [3]
@@ -481,11 +483,11 @@ ggplot(white_wines, aes(x = alcohol, y = density)) +
   theme_dark()
 ```
 
-Based on one sweetness classification [3], I expected to see sweeter wines
-appear on the left side of this plot, with less alcohol, and the dryer on the
-right side. Unfortunately, this pattern does not happens here. However, ther is
-no surprise on the pattern of lower density where there is less sugar, while it
-is the strongest relationship, as seen before.
+Based on one sweetness classification [3], I expected to see sweetest wines 
+appear on the left side of this plot, with less alcohol, and the dryest on the
+right side. Unfortunately, this pattern does not happens here. However, there 
+is no surprise on the pattern of lower density where there is less sugar, 
+because this is the strongest relationship, as seen before.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 multi_plot_3 <- ggplot(white_wines, aes(x = alcohol, y = density)) +
@@ -499,9 +501,9 @@ multi_plot_3
 multi_plot_3 + facet_wrap(~ quality)
 ```
 
-Best quality scores were given to wines which presentes lower densities and 
-greater alcohol quantity. It is true for values above 8, but again these values
-can happen for 6 or less. It is not a strong pattern too.
+Best quality scores were given, in general, to wines that contains lower 
+densities and greater alcohol quantity. It is true for grades above 8, but
+again these values can happen for 6 or less. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 white_wines$pH_levels <- cut(white_wines$pH, 
@@ -515,13 +517,13 @@ ggplot(white_wines, aes(y = fixed.acidity, x = free.sulfur.dioxide)) +
 ```
 
 Here I was really expecting that with higher fixed (tartaric) acidity, the pH
-would be lower as the amount of SO² used. But again, I could not perceive 
-relationship between higher quantities of SO² when there is a higher pH. I
-wonder why this winemaker does not seems to be worried about loss of
-effectiveness of SO² when the pH is high.
+would be lower and the amount of SO² too. But again, I could not perceive
+relationship between higher quantities of SO² when there is a higher pH. I 
+wonder why this winemaker does not use the practice of raise SO² when the pH is
+high, to prevent its loss of effectiveness.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# Breaks of residual sugar based on one classification [3]
+# Breaks of alcohol levels based on one classification [12]
 white_wines$alcohol_levels <- cut(white_wines$alcohol, 
                               breaks = c(5, 10, 11.5, 13.5, 15, 21),
                               labels = c('Low', 'Medium-Low', 'Medium',
@@ -539,7 +541,7 @@ multi_plot_4 + facet_wrap(~ alcohol_levels)
 ```
 
 Alcohol variable correlates well with total SO² and density variables. 
-There is a interesting visualization of high levels of alcohol for low
+It is a interesting visualization of high levels of alcohol for low
 quantities of total SO² and low density.
 
 # Multivariate Analysis
@@ -554,10 +556,10 @@ alcohol and pH values into their respective levels, gives another perspective
 to visualizations of correlations already known, like fixed acidity per free 
 SO² and pH.
 
-However, plots that involves quality variable does not provide additional 
+However, plots that involves the quality variable does not provide additional 
 information, due the fact that there are no variable with a high correlation 
-with it. I think there is no way to find a linear model to find quality scores
-based on other variables.
+with it. I found no way to find a linear model to find quality scores based on
+other variables.
 
 ### Were there any interesting or surprising interactions between features?
 
@@ -567,21 +569,9 @@ because they appear with some of the highest on the correlation matrix.
 
 My surprise was to see how the multivariate plots could help on a better 
 visualization of these relationships.
-
-### OPTIONAL: Did you create any models with your dataset? Discuss the \
-strengths and limitations of your model.
-
 ------
 
 # Final Plots and Summary
-
-> **Tip**: You've done a lot of exploration and have built up an understanding
-of the structure of and relationships between the variables in your dataset.
-Here, you will select three plots from all of your previous exploration to
-present here as a summary of some of your most interesting findings. Make sure
-that you have refined your selected plots for good titling, axis labels (with
-units), and good aesthetic choices (e.g. color, transparency). After each plot,
-make sure you justify why you chose each plot by describing what it shows.
 
 ### Plot One
 ```{r echo=FALSE, Plot_One}
@@ -634,14 +624,24 @@ can see that they have less quantities of total SO² too.
 
 # Reflection
 
-> **Tip**: Here's the final step! Reflect on the exploration you performed and
-the insights you found. What were some of the struggles that you went through?
-What went well? What was surprising? Make sure you include an insight into
-future work that could be done with the dataset.
+I thought it was a simpler task: based on a wine dataset, with eleven variables 
+that describe their chemical characteristics and one that is a score wine 
+experts have assign to them, I could identify what characteristics would 
+influence these experts. Based on a list of references that I've studied about 
+this subject, I identified a list of some variables that certainly would impact
+the final quality score. But I was wrong.
 
-- struggle: how to find a better correlation matrix plot to find interesting
-variables relationships. Tried some of them like GGally and PerformanceAnalytics
-but the results were not good.
+When comparing two variables, I've struggled to find a correlation matrix that
+could shows up the strongest relationships. My first try was catastrophic and I
+had to look at other alternatives. Once I achieve a satisfatory matrix I 
+realized that it was not what I've expected earlier. Density and alcohol, that
+I didn't have included on my list at first, seems to be more related to quality
+scores. I tried to convince myself that the evaluation was purely subjective 
+and not based on any variables. Yes, it is subjective, but some variables and 
+experts' profile can give a clue. They could see more value on the fact that 
+these winemakers do not add more SO² when the pH is high, and instead use less
+SO² when alcohol quantities are high.
 
-> **Tip**: Don't forget to remove this, and the other **Tip** sections before
-saving your final work and knitting the final report!
+It would be nice if I could analyse more variables for these wines in the 
+future, like grape types used or their equivalence to other wine types, that
+would allows us to do a direct comparision with other winemakers products.
