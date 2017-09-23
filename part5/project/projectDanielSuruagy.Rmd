@@ -569,7 +569,6 @@ because they appear with some of the highest on the correlation matrix.
 
 My surprise was to see how the multivariate plots could help on a better 
 visualization of these relationships.
-------
 
 # Final Plots and Summary
 
@@ -620,7 +619,6 @@ It's nice to see that most wines have low levels of alcohol, and high levels of
 density and total SO². Those wines which have medium-high level of alcohol, have 
 low values of density and are the ones most well evaluated by experts. Here we 
 can see that they have less quantities of total SO² too.
-------
 
 # Reflection
 
