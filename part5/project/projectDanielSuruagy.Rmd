@@ -64,6 +64,17 @@ greater than 1.2-1.3 g/L becoming unpleasant. [13]
 I expect that wines with values above 0.6 g/L will be receive a low grade.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+qplot(citric.acid, data = white_wines)
+
+summary(white_wines$citric.acid)
+```
+
+Citric acid naturally present in grapes are consumed during fermentation, but
+winemakers add it to give freshness. However, it can add microbial instability,
+so tartaric acid is a better choice to acidify wines [15]. Its concentration is
+about 1/20 of tartaric acid [16]. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 qplot(residual.sugar, data = white_wines)
 
 ggplot(white_wines, aes(x = residual.sugar)) +
@@ -207,19 +218,25 @@ These variables serve as a start point for the bivariate analysis presented
 below.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_density}
-p_sugar <- ggplot(white_wines, aes(x = residual.sugar, y = density)) +
-  geom_point(alpha = 0.1) + 
-  geom_smooth(method = 'lm')
+# Function to create scatterplots with a straight smooth line.
+# parameters:
+# var_x - the variable used on x axis.
+# var_y - the variable used on y axis.
+create_scatter_smooth <- function(var_x, var_y) {
+  return(ggplot(aes_string(x = var_x, y = var_y), data = white_wines) + 
+           geom_point(alpha = 0.1) + 
+           geom_smooth(method = 'lm'))
+}
 
-p_alcohol <- ggplot(white_wines, aes(x = alcohol, y = density)) +
-  geom_point(alpha = 0.1) + ylab(NULL) +
-  scale_y_continuous(labels = NULL) + 
-  geom_smooth(method = 'lm')
+p_sugar <- create_scatter_smooth('residual.sugar', 'density')
 
-p_sulfur <- ggplot(white_wines, aes(x = total.sulfur.dioxide, y = density)) +
-  geom_point(alpha = 0.1) + ylab(NULL) +
-  scale_y_continuous(labels = NULL) + 
-  geom_smooth(method = 'lm')
+p_alcohol <- create_scatter_smooth('alcohol', 'density') + 
+  ylab(NULL) +
+  scale_y_continuous(labels = NULL) 
+  
+p_sulfur <- create_scatter_smooth('total.sulfur.dioxide', 'density') +
+  ylab(NULL) +
+  scale_y_continuous(labels = NULL)
 
 grid.arrange(p_sugar, p_alcohol, p_sulfur, ncol = 3)
 
@@ -240,9 +257,7 @@ density, with a value of positive 0.62.
 It's possible to see like alcohol relates with other variables:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(white_wines, aes(x = alcohol, y = total.sulfur.dioxide)) +
-  geom_jitter(alpha = 0.1) + 
-  geom_smooth(method = 'lm')
+create_scatter_smooth('alcohol', 'total.sulfur.dioxide')
 ```
 
 Here is possible to see a trick used by winemakers: the lower the pH and the 
@@ -250,10 +265,8 @@ higher the alcohol, the less SO2 (total sulfur dioxide) a wine needs because of
 their anti-oxidative and anti-microbial properties [6].
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(white_wines, aes(x = alcohol, y = residual.sugar)) +
-  geom_point(alpha = 0.1) + 
-  scale_y_log10() +
-  geom_smooth(method = 'lm')
+create_scatter_smooth('alcohol', 'residual.sugar') + 
+  scale_y_log10() 
 ```
 
 Sugar is transformed into alcohol, during fermentation. In dry wines, almost 
@@ -262,19 +275,15 @@ before all sugar was consumed, leaving residual sugar [7]. The plot above shows
 that there is less sugar when alcohol values are greater, as expected.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(white_wines, aes(x = alcohol, y = chlorides)) +
-  geom_jitter(alpha = 0.1) +
-  scale_y_log10() +
-  geom_smooth(method = 'lm')
+create_scatter_smooth('alcohol', 'chlorides') +
+  scale_y_log10() 
 ```
 
 Here, the variance of chlorides is very small. Somehow, there are less
-chlorides when ther is more alcohol.
+chlorides when there is more alcohol.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_pH2}
-ggplot(white_wines, aes(x = fixed.acidity, y = pH)) +
-  geom_jitter(alpha = 0.1) +
-  geom_smooth(method = 'lm')
+create_scatter_smooth('fixed.acidity', 'pH')
 ```
 
 It is known that lower values of pH indicates more acidity of substances, and
@@ -282,15 +291,11 @@ it is what can be seen when comparing pH per fixed.acidity, with a negative
 correlation.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_pH}
-p_pH_SO2 <- ggplot(white_wines, aes(x = total.sulfur.dioxide, y = pH)) +
-  geom_jitter(alpha = 0.1) +
-  scale_x_log10() +
-  geom_smooth(method = 'lm')
+p_pH_SO2 <- create_scatter_smooth('total.sulfur.dioxide', 'pH') +
+  scale_x_log10() 
 
-p_pH_fSO2 <- ggplot(white_wines, aes(x = free.sulfur.dioxide, y = pH)) +
-  geom_jitter(alpha = 0.1) +
-  scale_x_log10() +
-  geom_smooth(method = 'lm')
+p_pH_fSO2 <- create_scatter_smooth('free.sulfur.dioxide', 'pH') +
+  scale_x_log10() 
 
 grid.arrange(p_pH_SO2, p_pH_fSO2, ncol = 2)
 ```
@@ -301,10 +306,9 @@ and more sulfite is needed to protect the wine [11]. However, this dataset does
 not shows relationship between them.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(white_wines, aes(y = total.sulfur.dioxide, x = free.sulfur.dioxide)) +
-  geom_jitter(alpha = 0.1) +
-  geom_smooth(method = 'lm')
+create_scatter_smooth('free.sulfur.dioxide', 'total.sulfur.dioxide')
 ```
+
 As expected, because theser variables names tells everything about their high
 correlation, the free sulfur dioxide correlates with the total sulfur dioxide 
 quantity.
@@ -433,16 +437,22 @@ There is nothing of significance in this plot. So I decided to view plots
 using at least three correlated variables.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Breaks of residual sugar based on one classification [3]
+white_wines$sweetness <- cut(white_wines$residual.sugar, 
+                              breaks = c(0, 5, 10, 20, 30, 100),
+                              labels = c('Extra dry', 'Dry', 'Semi Dry',
+                                         'Semi Sweet', 'Sweet'))
+
 multi_plot_1 <- ggplot(white_wines, aes(x = residual.sugar, y = density)) +
   geom_point(aes(colour = quality)) +
-  scale_color_brewer(type = "seq", palette = "BuPu") +
+  scale_color_brewer(type = "seq", palette = "YlGnBu") +
   coord_cartesian(xlim = c(0, 25), ylim = c(0.988, 1.005)) +
   theme_dark()
 
 multi_plot_1
 
 # new visualization per quality
-multi_plot_1 + facet_wrap(~ quality)
+multi_plot_1 + facet_wrap(~ sweetness)
 
 ```
 
@@ -451,17 +461,26 @@ evaluations. Scores above 8 are given to wines with lower densities and less
 sugar, but it can happen with score 6 also. I could not identify a relevant 
 pattern here.
 
+To better understand sugar classification found in wine labels, I introduced
+a sweetness variable based on residual sugar, with these values: [3]
+
+* Extra dry: 0 - 5 g/L
+* Dry: 5 - 10 g/L
+* Semi Dry: 10 - 20 g/L
+* Semi Sweet: 20 - 30 g/L
+* Sweet: 30 - 100 g/L
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 multi_plot_2 <- ggplot(white_wines, aes(y = density, x = chlorides)) +
   geom_point(aes(colour = quality)) +
-  scale_color_brewer(type = "seq", palette = "YlOrRd") +
+  scale_color_brewer(type = "seq", palette = "YlGnBu") +
   scale_x_log10() +
   coord_cartesian(ylim = c(0.985, 1.005)) +
   theme_dark()
 
 multi_plot_2
 
-multi_plot_2 + facet_wrap(~ quality) 
+multi_plot_2 + facet_wrap(~ quality) + theme(legend.position="none")
 ```
 
 Another weak correlation can be verified here. The darker colors of the higher
@@ -470,12 +489,6 @@ chlorides and density are lower. Because there are fewer wines with scores
 above 8, it is also difficult to find a pattern here.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# Breaks of residual sugar based on one classification [3]
-white_wines$sweetness <- cut(white_wines$residual.sugar, 
-                              breaks = c(0, 5, 10, 20, 30, 100),
-                              labels = c('Extra dry', 'Dry', 'Semi Dry',
-                                         'Semi Sweet', 'Sweet'))
-
 ggplot(white_wines, aes(x = alcohol, y = density)) +
   geom_point(aes(colour = sweetness)) +
   scale_color_brewer(type = "seq", palette = "PuRd", direction = -1) +
@@ -490,6 +503,12 @@ is no surprise on the pattern of lower density where there is less sugar,
 because this is the strongest relationship, as seen before.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Breaks of alcohol levels based on one classification [12]
+white_wines$alcohol_levels <- cut(white_wines$alcohol, 
+                              breaks = c(5, 10, 11.5, 13.5, 15, 21),
+                              labels = c('Low', 'Medium-Low', 'Medium',
+                                         'Medium-High', 'High'))
+
 multi_plot_3 <- ggplot(white_wines, aes(x = alcohol, y = density)) +
   geom_point(aes(colour = quality)) +
   scale_color_brewer(type = "seq", palette = "YlGnBu") +
@@ -498,16 +517,25 @@ multi_plot_3 <- ggplot(white_wines, aes(x = alcohol, y = density)) +
 
 multi_plot_3
 
-multi_plot_3 + facet_wrap(~ quality)
+multi_plot_3 + facet_wrap(~ alcohol_levels)
 ```
 
 Best quality scores were given, in general, to wines that contains lower 
-densities and greater alcohol quantity. It is true for grades above 8, but
+densities and greater alcohol quantities. It is true for grades above 8, but
 again these values can happen for 6 or less. 
+
+To better visualize alcohol quantities, I've cutted it in levels, using the
+following classification [12]:
+
+* Low: 5 - 10%
+* Medium-Low: 10 - 11.5%
+* Medium: 11.15 - 13.5%
+* Medium-High: 13.5 - 15%
+* High: 15 - 21%
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 white_wines$pH_levels <- cut(white_wines$pH, 
-                             breaks = c(2.7, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.7, 4))
+                        breaks = c(2.7, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.7, 4))
 
 ggplot(white_wines, aes(y = fixed.acidity, x = free.sulfur.dioxide)) +
   geom_point(aes(colour = pH_levels)) +
@@ -523,13 +551,10 @@ wonder why this winemaker does not use the practice of raise SO² when the pH is
 high, to prevent its loss of effectiveness.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# Breaks of alcohol levels based on one classification [12]
-white_wines$alcohol_levels <- cut(white_wines$alcohol, 
-                              breaks = c(5, 10, 11.5, 13.5, 15, 21),
-                              labels = c('Low', 'Medium-Low', 'Medium',
-                                         'Medium-High', 'High'))
 
-multi_plot_4 <- ggplot(white_wines, aes(y = total.sulfur.dioxide, x = density)) +
+
+multi_plot_4 <- ggplot(white_wines, 
+                       aes(y = total.sulfur.dioxide, x = density)) +
   geom_point(aes(colour = alcohol_levels)) +
   scale_color_brewer(type = "seq") +
   coord_cartesian(ylim = c(0, 300), xlim = c(0.985, 1.005))  +
@@ -537,12 +562,14 @@ multi_plot_4 <- ggplot(white_wines, aes(y = total.sulfur.dioxide, x = density)) 
 
 multi_plot_4
 
-multi_plot_4 + facet_wrap(~ alcohol_levels)
+multi_plot_4 + facet_wrap(~ quality)
 ```
 
 Alcohol variable correlates well with total SO² and density variables. 
 It is a interesting visualization of high levels of alcohol for low
-quantities of total SO² and low density.
+quantities of total SO² and low density. Correlation with quality score is
+weaker. It is possible to see wines with low levels of alcohol and a score of 
+8 and medium-high level of alcohol and score of 5.
 
 # Multivariate Analysis
 
