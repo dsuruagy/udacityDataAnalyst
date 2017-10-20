@@ -30,5 +30,7 @@ pred = clf.predict(features_test)
 from sklearn.metrics import accuracy_score
 acc = accuracy_score(pred, labels_test)
 
+print "accuracy:", acc
+
 def submitAccuracy():
     return acc
