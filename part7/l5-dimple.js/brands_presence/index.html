@@ -5,13 +5,11 @@
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
   <style type="text/css">
-    circle.dimple-series-1 {
-      fill: red;
+
+    .dimple-bar {
+      fill: #E5D2AE;
     }
 
-    h2 {
-      text-align: center;
-    }
   </style>
   <script type="text/javascript">
       function draw(data) {
@@ -25,10 +23,6 @@
               width = 1400 - margin,
               height = 600 - margin;
 
-          debugger;
-
-          d3.select("body").append("h2").text("World Cup Attendance");
-
           var svg = d3.select("body")
             .append("svg")
               .attr("width", width + margin)
@@ -41,26 +35,35 @@
       */
 
           var myChart = new dimple.chart(svg, data);
-          var x = myChart.addTimeAxis("x", "year"); 
-          x.dateParseFormat = "%Y";
-          x.tickFormat = "%Y"
-          x.timeInterval = 4;
-          myChart.addMeasureAxis("y", "attendance");
-          myChart.addSeries(null, dimple.plot.line);
-          myChart.addSeries(null, dimple.plot.scatter);
+          var x = myChart.addMeasureAxis("x", "value"); 
+          x.title = null;
+          x.tickFormat = '.0f'
+          var y = myChart.addCategoryAxis("y", "brand");
+          y.title = null;
+          y.addOrderRule("value", false);
+
+          var s = myChart.addSeries(null, dimple.plot.bar);
           myChart.draw();
 
-//          svg.append("text").text("World Cup Attendance").attr("x", 0).attr("y", 15);
+          svg.append("text").text("Top Brands by Social Media Presence").attr("x", margin).attr("y", 40);
         };
       </script>
   </head>
 <body>
   <script type="text/javascript">
-  /*
-    Use D3 (not dimple.js) to load the TSV file
-    and pass the contents of it to the draw function
-    */
-  d3.tsv("world_cup.tsv", draw);
+
+    var data = [
+      {'brand' : 'Youtube', 'value' : 1452921},
+      {'brand' : 'eBay', 'value' :  1158424},
+      {'brand' : 'Google', 'value' :  780929},
+      {'brand' : 'Apple', 'value' : 517532},
+      {'brand' : 'Skype', 'value' : 374786},
+      {'brand' : 'Samsung', 'value' : 374786},
+      {'brand' : 'Disney', 'value' : 270867},
+      {'brand' : 'Nokia', 'value' : 259728},
+    ];
+
+    draw(data);
   </script>
 </body>
 </html>
