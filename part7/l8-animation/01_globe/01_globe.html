@@ -34,6 +34,30 @@
                     .style('stroke', 'black')
                     .style('stroke-width, 0.5');
 
+        function agg_year(leaves) {
+            // aggregation
+            var total = d3.sum(leaves, function(d) {
+              return d['attendance'];
+            });
+
+            var coords = leaves.map(function(d) {
+              return projection([+d.long, +d.lat]);
+            });
+
+            var center_x = d3.mean(coords, function(d) {
+              return d[0];
+            });
+
+            var center_y = d3.mean(coords, function(d) {
+              return d[1];
+            });
+
+            return {
+              'attendance' : total,
+              'x' : center_x,
+              'y' : center_y
+            }
+        };                    
         
         function plot_points(data) {
           var nested = d3.nest()
@@ -41,31 +65,32 @@
                           // grouping
                           return d['date'].getUTCFullYear();
                         })
-                        .rollup(function(leaves) {
-                          // aggregation
-                          var total = d3.sum(leaves, function(d) {
-                            return d['attendance'];
-                          });
-
-                          var coords = leaves.map(function(d) {
-                            return projection([+d.long, +d.lat]);
-                          });
-
-                          var center_x = d3.mean(coords, function(d) {
-                            return d[0];
-                          });
-
-                          var center_y = d3.mean(coords, function(d) {
-                            return d[1];
-                          });
-
-                          return {
-                            'attendance' : total,
-                            'x' : center_x,
-                            'y' : center_y
-                          }
-                        })
+                        .rollup(agg_year)
                         .entries(data);
+
+          var attendance_max = d3.max(nested, function(d) {
+            return d.values['attendance'];
+          });
+
+          var radius = d3.scale.sqrt()
+                        .domain([0, attendance_max])
+                        .range([0,15]);
+
+          svg.append('g')
+            .attr("class", "bubble")
+            .selectAll("circle")
+            .data(nested.sort(function(a, b){
+              return b.values['attendance'] - a.values['attendance'];
+            }))
+            .enter()
+            .append("circle")
+            .attr("cx", function(d) { return d.values['x'];})
+            .attr("cy", function(d) { return d.values['y'];})
+            .attr("r", function(d) { return radius(d.values['attendance'])})
+            .attr('fill', 'rgb(247, 148,32)')
+            .attr('stroke', 'black')
+            .attr('stroke-width', 0.7)
+            .attr('opacity', 0.7);
         };
 
         var format = d3.time.format("%d-%m-%Y (%H:%M h)");
