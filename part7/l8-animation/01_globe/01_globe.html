@@ -4,6 +4,17 @@
   <meta charset="utf-8">
   <script src="http://d3js.org/d3.v3.min.js"></script>
     <style>
+      circle {
+        fill: rgb(247, 148,32);
+        stroke: black;
+        stroke-width : 0.7;
+        opacity : 0.7;
+      }
+
+      path {
+        stroke: black;
+        stroke-width: 0.5;
+      }
     </style>
     <script type="text/javascript">  
       function draw(geo_data) {
@@ -32,34 +43,43 @@
                     .attr('d', path)
                     .style('fill', 'rgb(9, 157, 217')
                     .style('stroke', 'black')
-                    .style('stroke-width, 0.5');
+                    .style('stroke-width', 0.5);
 
-        function agg_year(leaves) {
-            // aggregation
-            var total = d3.sum(leaves, function(d) {
-              return d['attendance'];
-            });
-
-            var coords = leaves.map(function(d) {
-              return projection([+d.long, +d.lat]);
-            });
-
-            var center_x = d3.mean(coords, function(d) {
-              return d[0];
-            });
-
-            var center_y = d3.mean(coords, function(d) {
-              return d[1];
-            });
-
-            return {
-              'attendance' : total,
-              'x' : center_x,
-              'y' : center_y
-            }
-        };                    
         
         function plot_points(data) {
+          function agg_year(leaves) {
+              // aggregation
+              var total = d3.sum(leaves, function(d) {
+                return d['attendance'];
+              });
+
+              var coords = leaves.map(function(d) {
+                return projection([+d.long, +d.lat]);
+              });
+
+              var center_x = d3.mean(coords, function(d) {
+                return d[0];
+              });
+
+              var center_y = d3.mean(coords, function(d) {
+                return d[1];
+              });
+
+              var teams = d3.set();
+
+              leaves.forEach(function(d) {
+                  teams.add(d['team1']);
+                  teams.add(d['team2']);
+              });
+
+              return {
+                'attendance' : total,
+                'x' : center_x,
+                'y' : center_y,
+                'teams' : teams.values()
+              }
+          };  
+
           var nested = d3.nest()
                         .key(function(d) {
                           // grouping
@@ -75,22 +95,56 @@
           var radius = d3.scale.sqrt()
                         .domain([0, attendance_max])
                         .range([0,15]);
+          
+          function key_func(d) {
+              return d['key'];
+          }
 
           svg.append('g')
             .attr("class", "bubble")
             .selectAll("circle")
             .data(nested.sort(function(a, b){
               return b.values['attendance'] - a.values['attendance'];
-            }))
+            }), key_func)
             .enter()
             .append("circle")
             .attr("cx", function(d) { return d.values['x'];})
             .attr("cy", function(d) { return d.values['y'];})
-            .attr("r", function(d) { return radius(d.values['attendance'])})
-            .attr('fill', 'rgb(247, 148,32)')
-            .attr('stroke', 'black')
-            .attr('stroke-width', 0.7)
-            .attr('opacity', 0.7);
+            .attr("r", function(d) { return radius(d.values['attendance'])});
+
+          function update(year) {
+              var filtered = nested.filter(function(d) {
+                  return new Date(d['key']).getUTCFullYear() === year;
+              });
+              
+              debugger;
+
+              var circles = svg.selectAll('circle')
+                               .data(filtered, key_func);
+
+              circles.exit().remove();
+
+              circles.enter()
+                .append("circle")
+                .attr("cx", function(d) { return d.values['x'];})
+                .attr("cy", function(d) { return d.values['y'];})
+                .attr("r", function(d) { return radius(d.values['attendance'])});
+
+              var countries = filtered[0].values['teams'];
+
+              svg.selectAll('path')
+                .style('fill', function(d) {
+                  if(countries.indexOf(d.properties.name) !== -1) {
+                    return 'lightBlue';
+                  } else {
+                    return 'white';
+                  }
+                })
+
+          }
+
+          debugger;
+          update(1930);          
         };
 
         var format = d3.time.format("%d-%m-%Y (%H:%M h)");
