@@ -15,13 +15,21 @@
         stroke: black;
         stroke-width: 0.5;
       }
+
+      h2 {
+       text-align: center;
+      }
     </style>
     <script type="text/javascript">  
       function draw(geo_data) {
         "use strict";
         var margin = 75,
-            width = 1920 - margin,
-            height = 1080 - margin;
+            width = 1400 - margin,
+            height = 600 - margin;
+
+        d3.select("body")
+          .append("h2")
+          .text("World Cup");
 
         var svg = d3.select("body")
             .append("svg")
@@ -31,8 +39,8 @@
             .attr('class', 'map');
       
         var projection = d3.geo.mercator()
-            .scale(120)
-            .translate([width / 2, height / 1.5]);
+            .scale(140)
+            .translate([width / 2, height / 1.2]);
 
         var path = d3.geo.path().projection(projection);
 
@@ -117,7 +125,7 @@
                   return new Date(d['key']).getUTCFullYear() === year;
               });
               
-              debugger;
+              //debugger;
 
               var circles = svg.selectAll('circle')
                                .data(filtered, key_func);
@@ -126,6 +134,8 @@
 
               circles.enter()
                 .append("circle")
+                .transition()
+                .duration(500)
                 .attr("cx", function(d) { return d.values['x'];})
                 .attr("cy", function(d) { return d.values['y'];})
                 .attr("r", function(d) { return radius(d.values['attendance'])});
@@ -133,6 +143,8 @@
               var countries = filtered[0].values['teams'];
 
               svg.selectAll('path')
+                .transition()
+                .duration(500)
                 .style('fill', function(d) {
                   if(countries.indexOf(d.properties.name) !== -1) {
                     return 'lightBlue';
@@ -141,10 +153,33 @@
                   }
                 })
 
+              d3.select("h2")
+                .text("World Cup " + year);
+
           }
 
-          debugger;
-          update(1930);          
+          //debugger;
+          //update(1930);          
+
+          var years = [];
+
+          for (var i = 1930; i <= 2014; i += 4) {
+            if (i !== 1942 && i !== 1946) {
+              years.push(i);
+            }
+          }
+
+          var year_idx = 0;
+
+          var year_interval = setInterval(function() {
+            update(years[year_idx]);
+
+            year_idx++;
+
+            if(year_idx >= years.length) {
+              clearInterval(year_interval);
+            }
+          }, 1000);
         };
 
         var format = d3.time.format("%d-%m-%Y (%H:%M h)");
