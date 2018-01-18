@@ -19,6 +19,17 @@
       h2 {
        text-align: center;
       }
+
+      div.years_buttons {
+          position: fixed;
+          top: 5px;
+          left: 50px;
+      }
+      div.years_buttons div {
+          background-color: rgb(251, 201, 127);
+          padding: 3px;
+          margin: 7px;
+      }
     </style>
     <script type="text/javascript">  
       function draw(geo_data) {
@@ -53,7 +64,7 @@
                     .style('stroke', 'black')
                     .style('stroke-width', 0.5);
 
-        
+
         function plot_points(data) {
           function agg_year(leaves) {
               // aggregation
@@ -178,8 +189,37 @@
 
             if(year_idx >= years.length) {
               clearInterval(year_interval);
+
+              var buttons = d3.select("body")
+                .append("div")
+                .attr("class", "years_buttons")
+                .selectAll("div")
+                .data(years)
+                .enter()
+                .append("div")
+                .text(function(d) {
+                  return d;
+                });
+
+              buttons.on('click', function(d) {
+                d3.selectAll('div.years_buttons div')
+                  .transition()
+                  .duration(500)
+                  .style('background', null)
+                  .style('color', null);
+
+                d3.select(this)
+                  .transition()
+                  .duration(500)
+                  .style('background', 'lightBlue')
+                  .style('color', 'white');
+
+                update(d);
+              });
             }
           }, 1000);
+
+
         };
 
         var format = d3.time.format("%d-%m-%Y (%H:%M h)");
