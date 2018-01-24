@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+    <style>
+    </style>
+    <script type="text/javascript">
+    	function draw(data) {
+    		debugger;
+    	}
+    </script>
+  </head>
+<body>
+  <script type="text/javascript">
+   
+	d3.csv("2008-reduce.csv", function(d) {
+		d['date'] = d['Year'] + '/' + d['Month'] + '/' + d['DayofMonth'];
+		return d;
+	}, draw);
+  </script>
+</body>
+</html>

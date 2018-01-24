@@ -1,0 +1,113 @@
+---
+title: "Flights Analysis"
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Load all packages
+library(ggplot2)
+library(gridExtra)
+library(corrr)
+library(corrplot)
+library(RColorBrewer)
+setwd('/home/daniel/dataAnalyst/part7/project')
+```
+
+Load the data
+
+Variable descriptions
+	Name 	Description
+1 	Year 	1987-2008
+2 	Month 	1-12
+3 	DayofMonth 	1-31
+4 	DayOfWeek 	1 (Monday) - 7 (Sunday)
+5 	DepTime 	actual departure time (local, hhmm)
+6 	CRSDepTime 	scheduled departure time (local, hhmm)
+7 	ArrTime 	actual arrival time (local, hhmm)
+8 	CRSArrTime 	scheduled arrival time (local, hhmm)
+9 	UniqueCarrier 	unique carrier code
+10 	FlightNum 	flight number   (REMOVE)
+11 	TailNum 	plane tail number (REMOVE)
+12 	ActualElapsedTime 	in minutes
+13 	CRSElapsedTime 	in minutes
+14 	AirTime 	in minutes
+15 	ArrDelay 	arrival delay, in minutes
+16 	DepDelay 	departure delay, in minutes
+17 	Origin 	origin IATA airport code    (REMOVE)
+18 	Dest 	destination IATA airport code (REMOVE) 
+19 	Distance 	in miles  (REMOVE)
+20 	TaxiIn 	taxi in time, in minutes
+21 	TaxiOut 	taxi out time in minutes
+22 	Cancelled 	was the flight cancelled?   (REMOVE)
+23 	CancellationCode 	reason for cancellation (A = carrier, B = weather, C = NAS, D = security)   (REMOVE)
+24 	Diverted 	1 = yes, 0 = no  (REMOVE)
+25 	CarrierDelay 	in minutes
+26 	WeatherDelay 	in minutes
+27 	NASDelay 	in minutes
+28 	SecurityDelay 	in minutes
+29 	LateAircraftDelay 	in minutes
+```{r}
+flights_2008 <- read.csv('2008.csv', nrows = 2000000)
+#flights_2008 <- read.csv('2008.csv')
+str(flights_2008)
+```
+```{r}
+qplot(data=flights_2008, UniqueCarrier)
+```
+
+```{r}
+qplot(data=flights_2008, FlightNum)
+```
+
+# reason for cancellation (A = carrier, B = weather, C = NAS, D = security)
+```{r}
+qplot(CancellationCode, data=flights_2008[flights_2008$Cancelled == 1, ])
+```
+
+```{r}
+qplot(data=flights_2008[!flights_2008$CarrierDelay == 0, ], CarrierDelay)
+```
+
+```{r}
+flights_num <- flights_2008[, sapply(flights_2008, is.numeric)]
+
+flights_num
+#cor(flights_num, use = "pairwise.complete.obs")
+
+#correlate(flights_num, use="pairwise.complete.obs")
+```
+```{r}
+#network_plot(correlate(flights_num, use="complete.obs"), min_cor = 0.2, legend = TRUE)
+``` 
+
+
+
+```{r}
+#corrplot.mixed(cor(white_wines), order = "hclust", tl.col = "black")
+#corrplot(cor(flights_num, use="complete.obs"), type='upper',  tl.srt=45)
+corrplot(cor(flights_num, use="pairwise.complete.obs"), type='upper',  tl.srt=45)
+
+```
+# relationships to explore:
+# 
+#
+
+
+```{r}
+p_1 <- ggplot(flights_2008, aes(x=CarrierDelay, y=ArrDelay)) + geom_point()
+
+p_2 <- ggplot(flights_2008, aes(x=CRSElapsedTime, y=ActualElapsedTime)) + geom_point()
+
+grid.arrange(p_1, p_2, ncol = 2)
+```
+```{r}
+summary(flights_2008)
+
+#teste <- flights_2008[!is.na(flights_2008$CarrierDelay)]
+teste <- subset(flights_2008, !is.na(CarrierDelay))
+teste
+
+
+ggplot(subset(flights_2008, !is.na(CarrierDelay))) +
+  geom_line(aes(x=DayofMonth, y=CarrierDelay, colour=UniqueCarrier, group=UniqueCarrier))
+```
+
