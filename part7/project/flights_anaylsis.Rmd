@@ -12,60 +12,51 @@ library(RColorBrewer)
 setwd('/home/daniel/dataAnalyst/part7/project')
 ```
 
-Load the data
+#Load the data
 
-Variable descriptions
-	Name 	Description
-1 	Year 	1987-2008
-2 	Month 	1-12
-3 	DayofMonth 	1-31
-4 	DayOfWeek 	1 (Monday) - 7 (Sunday)
-5 	DepTime 	actual departure time (local, hhmm)
-6 	CRSDepTime 	scheduled departure time (local, hhmm)
-7 	ArrTime 	actual arrival time (local, hhmm)
-8 	CRSArrTime 	scheduled arrival time (local, hhmm)
-9 	UniqueCarrier 	unique carrier code
-10 	FlightNum 	flight number   (REMOVE)
-11 	TailNum 	plane tail number (REMOVE)
-12 	ActualElapsedTime 	in minutes
-13 	CRSElapsedTime 	in minutes
-14 	AirTime 	in minutes
-15 	ArrDelay 	arrival delay, in minutes
-16 	DepDelay 	departure delay, in minutes
-17 	Origin 	origin IATA airport code    (REMOVE)
-18 	Dest 	destination IATA airport code (REMOVE) 
-19 	Distance 	in miles  (REMOVE)
-20 	TaxiIn 	taxi in time, in minutes
-21 	TaxiOut 	taxi out time in minutes
-22 	Cancelled 	was the flight cancelled?   (REMOVE)
-23 	CancellationCode 	reason for cancellation (A = carrier, B = weather, C = NAS, D = security)   (REMOVE)
-24 	Diverted 	1 = yes, 0 = no  (REMOVE)
-25 	CarrierDelay 	in minutes
-26 	WeatherDelay 	in minutes
-27 	NASDelay 	in minutes
-28 	SecurityDelay 	in minutes
-29 	LateAircraftDelay 	in minutes
+#Variable descriptions
+#	Name 	Description
+#1 	Year 	1987-2008  (APPEND TO DATE)
+#2 	Month 	1-12     (APPEND TO DATE)
+#3 	DayofMonth 	1-31 (APPEND TO DATE)
+#4 	DayOfWeek 	1 (Monday) - 7 (Sunday)
+#5 	DepTime 	actual departure time (local, hhmm)  (REMOVE)
+#6 	CRSDepTime 	scheduled departure time (local, hhmm)
+#7 	ArrTime 	actual arrival time (local, hhmm)  (REMOVE)
+#8 	CRSArrTime 	scheduled arrival time (local, hhmm)
+#9 	UniqueCarrier 	unique carrier code
+#10 	FlightNum 	flight number   (REMOVE)
+#11 	TailNum 	plane tail number (REMOVE)
+#12 	ActualElapsedTime 	in minutes (REMOVE)
+#13 	CRSElapsedTime 	in minutes  (REMOVE)
+#14 	AirTime 	in minutes (REMOVE)
+#15 	ArrDelay 	arrival delay, in minutes   
+#16 	DepDelay 	departure delay, in minutes 
+#17 	Origin 	origin IATA airport code    (REMOVE)
+#18 	Dest 	destination IATA airport code (REMOVE) 
+#19 	Distance 	in miles        (REMOVE)
+#20 	TaxiIn 	taxi in time, in minutes   (REMOVE)
+#21 	TaxiOut 	taxi out time in minutes   (REMOVE)
+#22 	Cancelled 	was the flight cancelled?   (REMOVE)
+#23 	CancellationCode 	reason for cancellation (A = carrier, B = weather, C = NAS, D = security)   (REMOVE)
+#24 	Diverted 	1 = yes, 0 = no  (REMOVE)
+#25 	CarrierDelay 	in minutes  (REMOVE)
+#26 	WeatherDelay 	in minutes  (REMOVE)
+#27 	NASDelay 	in minutes  (REMOVE)
+#28 	SecurityDelay 	in minutes  (REMOVE)
+#29 	LateAircraftDelay 	in minutes
+
+# cut -f2,3,4,6,8,9,15,16,29 -d, 2008.csv > 2008-cut.csv 
+
 ```{r}
-flights_2008 <- read.csv('2008.csv', nrows = 2000000)
-#flights_2008 <- read.csv('2008.csv')
+#flights_2008 <- read.csv('2008.csv', nrows = 2000)
+flights_2008 <- read.csv('2008-cut.csv')
 str(flights_2008)
 ```
 ```{r}
 qplot(data=flights_2008, UniqueCarrier)
 ```
 
-```{r}
-qplot(data=flights_2008, FlightNum)
-```
-
-# reason for cancellation (A = carrier, B = weather, C = NAS, D = security)
-```{r}
-qplot(CancellationCode, data=flights_2008[flights_2008$Cancelled == 1, ])
-```
-
-```{r}
-qplot(data=flights_2008[!flights_2008$CarrierDelay == 0, ], CarrierDelay)
-```
 
 ```{r}
 flights_num <- flights_2008[, sapply(flights_2008, is.numeric)]
@@ -81,33 +72,19 @@ flights_num
 
 
 
-```{r}
-#corrplot.mixed(cor(white_wines), order = "hclust", tl.col = "black")
-#corrplot(cor(flights_num, use="complete.obs"), type='upper',  tl.srt=45)
-corrplot(cor(flights_num, use="pairwise.complete.obs"), type='upper',  tl.srt=45)
-
-```
-# relationships to explore:
-# 
-#
-
+monit
 
 ```{r}
-p_1 <- ggplot(flights_2008, aes(x=CarrierDelay, y=ArrDelay)) + geom_point()
+flights_2008$ArrTimeInterval <- cut(flights_2008$CRSArrTime, 
+                              breaks = c(0, 100, 200, 300, 400, 500, 
+                                         600, 700, 800, 900, 1000, 1100, 
+                                         1200, 1300, 1400, 1500, 1600, 1700, 
+                                         1800, 1900, 2000, 2100, 2200, 2300, 2400),
+                              labels = c('00:00', '01:00', '02:00', '03:00', '04:00', '05:00',
+                                         '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
+                                         '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+                                         '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'))
 
-p_2 <- ggplot(flights_2008, aes(x=CRSElapsedTime, y=ActualElapsedTime)) + geom_point()
-
-grid.arrange(p_1, p_2, ncol = 2)
+ggplot(flights_2008, aes(x=ArrTimeInterval, y=ArrDelay + DepDelay)) +
+  geom_line()
 ```
-```{r}
-summary(flights_2008)
-
-#teste <- flights_2008[!is.na(flights_2008$CarrierDelay)]
-teste <- subset(flights_2008, !is.na(CarrierDelay))
-teste
-
-
-ggplot(subset(flights_2008, !is.na(CarrierDelay))) +
-  geom_line(aes(x=DayofMonth, y=CarrierDelay, colour=UniqueCarrier, group=UniqueCarrier))
-```
-
