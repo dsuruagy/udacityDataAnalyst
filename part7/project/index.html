@@ -14,7 +14,7 @@
 <body>
   <script type="text/javascript">
    
-	d3.csv("2008-reduce.csv", function(d) {
+	d3.csv("2008-cut.csv", function(d) {
 		d['date'] = d['Year'] + '/' + d['Month'] + '/' + d['DayofMonth'];
 		return d;
 	}, draw);
