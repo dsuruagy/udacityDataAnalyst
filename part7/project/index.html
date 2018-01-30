@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
     <style>
     </style>
     <script type="text/javascript">
@@ -17,14 +17,13 @@
 	            .attr("width", width + margin)
 	            .attr("height", height + margin)
 	            .append('g')
-	            .attr('class', 'chart');    		
+	            .attr('class', 'chart');
 
             svg.selectAll("circle")
             .data(data)
             .enter()
             .append("circle");
 
-	        debugger;
 
 	        var month_extent = d3.extent(data, function(d) {
 	        	return d['Month'];
@@ -34,29 +33,31 @@
 	        	return d['DayOfWeek'];
 	        });
 
-	        var depInterval = ['0:00', '1:00', '2:00', '3:00', '4:00', '5:00', '6:00',
-	        	'7:00','8:00','9:00','10:00','11:00','12:00','13:00', '14:00', '15:00', '16:00',
-	        	'17:00','18:00','19:00','20:00','21:00','22:00','23:00'];
-
 	        var meanDelay_extent = d3.extent(data, function(d) {
 	        	return d['meanDelay'];
 	        });
 
-	        var depInterval_scale = d3.scale.ordinal()
-            	.range([margin, width])
-            	.domain(depInterval);
+          var xMin = d3.min(data, function(d) {
+            return d['depInterval'];
+          });
 
-			var meanDelay_scale = d3.scale.linear()
+          var xMax = d3.max(data, function(d) {
+            return d['depInterval'];
+          });
+
+          var depInterval_scale = d3.scaleTime()
+          .range([margin, width])
+          .domain([xMin, xMax]);
+
+			var meanDelay_scale = d3.scaleLinear()
             	.range([height, margin])
             	.domain(meanDelay_extent);
 
-			var time_axis = d3.svg.axis()
-			.scale(depInterval_scale);
-			// .ticks(d3.time.hour, 1);
+			var time_axis = d3.axisBottom(depInterval_scale)
+        .ticks(24)
+        .tickFormat(d3.timeFormat("%H:%M"));
 
-			var delay_axis = d3.svg.axis()
-			.scale(meanDelay_scale)
-			.orient("left");
+			var delay_axis = d3.axisLeft(meanDelay_scale);
 
 			svg.append('g')
 			.attr('class', 'x axis')
@@ -70,10 +71,12 @@
 
 			svg.selectAll("circle")
 				.attr('cx', function(d) {
-					return d['depInterval'];
+
+          return depInterval_scale(d['depInterval']);
 				})
 				.attr('cy', function(d) {
-					return d['meanDelay'];
+          // debugger;
+					return meanDelay_scale(d['meanDelay']);
 				})
 				.attr('r', 5)
 				.attr('fill', 'black');
@@ -82,11 +85,14 @@
   </head>
 <body>
   <script type="text/javascript">
-   
-	d3.csv("2008-mean.csv", function(d) {
-		d['date'] = d['Year'] + '/' + d['Month'] + '/' + d['Dayof'];
-		return d;
-	}, draw);
+  	var parseHour = d3.timeParse("%H:%M");
+
+    d3.csv("2008-mean.csv", function(d) {
+      d['depInterval'] = parseHour(d['depInterval']);
+      d['meanDelay'] = +d['meanDelay'];
+
+      return d;
+    }, draw);
   </script>
 </body>
 </html>
