@@ -17,6 +17,7 @@
 	            .attr("width", width + margin)
 	            .attr("height", height + margin)
 	            .append('g')
+<<<<<<< HEAD
 	            .attr('class', 'chart');
 
 	        var meanDelay_extent = d3.extent(data, function(d) {
@@ -81,10 +82,74 @@
     				.attr('r', 5)
     				.attr('fill', 'black');
      }
+=======
+	            .attr('class', 'chart');    		
+
+            svg.selectAll("circle")
+            .data(data)
+            .enter()
+            .append("circle");
+
+	        debugger;
+
+	        var month_extent = d3.extent(data, function(d) {
+	        	return d['Month'];
+	        });
+
+	        var dayOfWeek_extent = d3.extent(data, function(d) {
+	        	return d['DayOfWeek'];
+	        });
+
+	        var depInterval = ['0:00', '1:00', '2:00', '3:00', '4:00', '5:00', '6:00',
+	        	'7:00','8:00','9:00','10:00','11:00','12:00','13:00', '14:00', '15:00', '16:00',
+	        	'17:00','18:00','19:00','20:00','21:00','22:00','23:00'];
+
+	        var meanDelay_extent = d3.extent(data, function(d) {
+	        	return d['meanDelay'];
+	        });
+
+	        var depInterval_scale = d3.scale.ordinal()
+            	.range([margin, width])
+            	.domain(depInterval);
+
+			var meanDelay_scale = d3.scale.linear()
+            	.range([height, margin])
+            	.domain(meanDelay_extent);
+
+			var time_axis = d3.svg.axis()
+			.scale(depInterval_scale);
+			// .ticks(d3.time.hour, 1);
+
+			var delay_axis = d3.svg.axis()
+			.scale(meanDelay_scale)
+			.orient("left");
+
+			svg.append('g')
+			.attr('class', 'x axis')
+			.attr('transform', "translate(0," + height + ")")
+			.call(time_axis);
+
+			svg.append('g')
+			.attr('class', 'y axis')
+			.attr('transform', "translate(" + margin + ",0)")
+			.call(delay_axis);
+
+			svg.selectAll("circle")
+				.attr('cx', function(d) {
+					return d['depInterval'];
+				})
+				.attr('cy', function(d) {
+					return d['meanDelay'];
+				})
+				.attr('r', 5)
+				.attr('fill', 'black');
+    	}
+>>>>>>> 63b4394297f28dc9f84d8a949f2db53f9b495352
     </script>
   </head>
 <body>
   <script type="text/javascript">
+<<<<<<< HEAD
   	var parseHour = d3.timeParse("%H:%M");
 
     d3.csv("2008-mean.csv", function(d) {
@@ -93,6 +158,13 @@
 
       return d;
     }, draw);
+=======
+   
+	d3.csv("2008-mean.csv", function(d) {
+		d['date'] = d['Year'] + '/' + d['Month'] + '/' + d['Dayof'];
+		return d;
+	}, draw);
+>>>>>>> 63b4394297f28dc9f84d8a949f2db53f9b495352
   </script>
 </body>
 </html>
