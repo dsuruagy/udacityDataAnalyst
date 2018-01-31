@@ -19,24 +19,11 @@
 	            .append('g')
 	            .attr('class', 'chart');
 
-            svg.selectAll("circle")
-            .data(data)
-            .enter()
-            .append("circle");
-
-
-	        var month_extent = d3.extent(data, function(d) {
-	        	return d['Month'];
-	        });
-
-	        var dayOfWeek_extent = d3.extent(data, function(d) {
-	        	return d['DayOfWeek'];
-	        });
-
 	        var meanDelay_extent = d3.extent(data, function(d) {
 	        	return d['meanDelay'];
 	        });
 
+          // https://stackoverflow.com/questions/23558701/d3-js-line-chart-with-time-on-both-axis
           var xMin = d3.min(data, function(d) {
             return d['depInterval'];
           });
@@ -45,42 +32,55 @@
             return d['depInterval'];
           });
 
-          var depInterval_scale = d3.scaleTime()
+          var scaleInterval = d3.scaleTime()
           .range([margin, width])
           .domain([xMin, xMax]);
 
-			var meanDelay_scale = d3.scaleLinear()
-            	.range([height, margin])
-            	.domain(meanDelay_extent);
+    			var scaleDelay = d3.scaleLinear()
+                	.range([height, margin])
+                	.domain(meanDelay_extent);
 
-			var time_axis = d3.axisBottom(depInterval_scale)
-        .ticks(24)
-        .tickFormat(d3.timeFormat("%H:%M"));
+    			var timeAxis = d3.axisBottom(scaleInterval)
+            .ticks(24)
+            .tickFormat(d3.timeFormat("%H:%M"));
 
-			var delay_axis = d3.axisLeft(meanDelay_scale);
+    			var delayAxis = d3.axisLeft(scaleDelay);
 
-			svg.append('g')
-			.attr('class', 'x axis')
-			.attr('transform', "translate(0," + height + ")")
-			.call(time_axis);
+    			svg.append('g')
+    			.attr('class', 'x axis')
+    			.attr('transform', "translate(0," + height + ")")
+    			.call(timeAxis);
 
-			svg.append('g')
-			.attr('class', 'y axis')
-			.attr('transform', "translate(" + margin + ",0)")
-			.call(delay_axis);
+    			svg.append('g')
+    			.attr('class', 'y axis')
+    			.attr('transform', "translate(" + margin + ",0)")
+    			.call(delayAxis);
 
-			svg.selectAll("circle")
-				.attr('cx', function(d) {
 
-          return depInterval_scale(d['depInterval']);
-				})
-				.attr('cy', function(d) {
-          // debugger;
-					return meanDelay_scale(d['meanDelay']);
-				})
-				.attr('r', 5)
-				.attr('fill', 'black');
-    	}
+          var nested = d3.nest()
+                      .key(function(d) { return d['Month']})
+                      .key(function(d) { return d['depInterval']})
+                      .rollup(function(leaves) {
+                        return d3.sum(leaves, function(d) { return d['meanDelay']});
+                      })
+                      .entries(data);
+
+          svg.selectAll("circle")
+          .data(nested[1]['values'])
+          .enter()
+          .append("circle")
+    				.attr('cx', function(d) {
+              // debugger;
+
+              return scaleInterval(d3.isoParse(d['key']));
+    				})
+    				.attr('cy', function(d) {
+              // debugger;
+    					return scaleDelay(d['value']);
+    				})
+    				.attr('r', 5)
+    				.attr('fill', 'black');
+     }
     </script>
   </head>
 <body>
