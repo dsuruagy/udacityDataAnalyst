@@ -24,17 +24,28 @@
 	            .append('g')
 	            .attr('class', 'chart');
 
-	        var meanDelay_extent = d3.extent(data, function(d) {
-	        	return d['meanDelay'];
-	        });
+          var minDelay = 0, maxDelay = 0;
+
+          // aggregate data by month and departure hour
+          var nested = d3.nest()
+            .key(function(d) { return d.Month})
+            .key(function(d) { return d.depInterval})
+            .rollup(function(leaves) {
+              // sum the delays for the aggregation
+              var sumDelays = d3.sum(leaves, function(d) { return d.meanDelay});
+              minDelay = Math.min(minDelay, sumDelays);
+              maxDelay = Math.max(maxDelay, sumDelays);
+              return sumDelays;
+            })
+            .entries(data);
 
           // https://stackoverflow.com/questions/23558701/d3-js-line-chart-with-time-on-both-axis
           var xMin = d3.min(data, function(d) {
-            return d['depInterval'];
+            return d.depInterval;
           });
 
           var xMax = d3.max(data, function(d) {
-            return d['depInterval'];
+            return d.depInterval;
           });
 
           var scaleInterval = d3.scaleTime()
@@ -43,9 +54,11 @@
 
     			var scaleDelay = d3.scaleLinear()
                 	.range([height, margin])
-                	.domain(meanDelay_extent);
+                	.domain([minDelay, maxDelay]);
 
-    			var timeAxis = d3.axisBottom(scaleInterval)
+          var colorScale = d3.scaleOrdinal(d3.schemeAccent).domain([1,12]);
+
+          var timeAxis = d3.axisBottom(scaleInterval)
             .ticks(24)
             .tickFormat(d3.timeFormat("%H:%M"));
 
@@ -61,27 +74,27 @@
     			.attr('transform', "translate(" + margin + ",0)")
     			.call(delayAxis);
 
+          // specify what will be shown in the lines
+          // http://bl.ocks.org/d3noob/d8be922a10cb0b148cd5
+          var line = d3.line()
+            .x(function(d) {
+              // d['key'] is the hour
+              return scaleInterval(d3.isoParse(d.key));
+            })
+            .y(function(d) {
+              // d['value'] is the delay value
+              return scaleDelay(d.value);
+            });
 
-          var nested = d3.nest()
-                      .key(function(d) { return d['Month']})
-                      .key(function(d) { return d['depInterval']})
-                      .rollup(function(leaves) {
-                        return d3.sum(leaves, function(d) { return d['meanDelay']});
-                      })
-                      .entries(data);
-
-          svg.append("path")
-            .data([nested[1]['values']])
-            .attr("class", "line")
-            .attr("d", d3.line()
-              .x(function(d) {
-                // debugger;
-                return scaleInterval(d3.isoParse(d['key']));
-              })
-              .y(function(d) {
-                return scaleDelay(d['value']);
-              })
-            );
+          // for each month in nested data, add a line for its values (hour and
+          // delay)
+          nested.forEach(function(d){
+            // debugger;
+            svg.append("path")
+              .attr("class", "line")
+              .attr("d", line(d.values))
+              .style("stroke", colorScale(d.key));
+          });
      }
     </script>
   </head>
