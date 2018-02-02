@@ -2,11 +2,10 @@
 <html>
 <head>
   <meta charset="utf-8">
-<script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
     <style>
       .line {
         fill: none;
-        stroke: steelblue;
         stroke-width: 2px;
       }
     </style>
@@ -25,6 +24,8 @@
 	            .attr('class', 'chart');
 
           var minDelay = 0, maxDelay = 0;
+          var months = ['Jan','Feb','Mar','Apr','May','Jun',
+                        'Jul','Aug','Sep','Oct','Nov','Dec'];
 
           // aggregate data by month and departure hour
           var nested = d3.nest()
@@ -56,7 +57,11 @@
                 	.range([height, margin])
                 	.domain([minDelay, maxDelay]);
 
-          var colorScale = d3.scaleOrdinal(d3.schemeAccent).domain([1,12]);
+          function getMonth(id) {
+            return months[id - 1];
+          }
+
+          var colorScale = d3.scaleOrdinal(d3.schemeCategory20).domain([1,12]);
 
           var timeAxis = d3.axisBottom(scaleInterval)
             .ticks(24)
@@ -92,9 +97,55 @@
             // debugger;
             svg.append("path")
               .attr("class", "line")
+              .attr("id", getMonth(d.key))
               .attr("d", line(d.values))
-              .style("stroke", colorScale(d.key));
+              .style("stroke", colorScale(d.key))
+              .style("opacity",0.2)
+              .on("mouseover", function(d) {
+
+                d3.select(this)
+                  .style('stroke-width', '6px')
+                  .style("opacity",1);
+
+                debugger;
+                d3.select("leg_" + this.id).style("color", "red");
+
+              })
+              .on("mouseout", function(d) {
+                d3.select(this)
+                  .style('stroke-width', '2px')
+                  .style("opacity",0.2);
+                d3.selectAll('legend').style("opacity", 0.2);
+              });
           });
+
+          var legend = svg.append("g")
+            .attr("class", "legend")
+            .attr("transform", "translate(" + (width - 100) + "," + 20 + ")")
+            .selectAll("g")
+            .data(months)
+            .enter().append("g");
+
+          legend.append("circle")
+            .attr("cy", function(d, i) {
+              return i * 30;
+            })
+            .attr("r", 5)
+            .attr("fill", function(d, i) {
+              return colorScale(i+1)
+            });
+
+          legend.append("text")
+            .attr("y", function(d, i) {
+              return i * 30 + 5;
+            })
+            .attr("x", 3 * 5)
+            .attr("id", function(d) {
+              return "leg_" + d;
+            })
+            .text(function(d) {
+              return d;
+            });
      }
     </script>
   </head>
