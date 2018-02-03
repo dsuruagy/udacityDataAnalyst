@@ -100,22 +100,36 @@
               .attr("id", getMonth(d.key))
               .attr("d", line(d.values))
               .style("stroke", colorScale(d.key))
-              .style("opacity",0.2)
+              .style("opacity",0.2);
+
+            svg.selectAll('path')
               .on("mouseover", function(d) {
 
                 d3.select(this)
+                  .transition()
+                  .duration(250)
                   .style('stroke-width', '6px')
-                  .style("opacity",1);
+                  .style("opacity", 1);
 
-                debugger;
-                d3.select("leg_" + this.id).style("color", "red");
+                d3.select("#leg_" + this.id)
+                  .transition()
+                  .duration(250)
+                  .style("font-weight", "bold");
+                // debugger;
 
               })
               .on("mouseout", function(d) {
                 d3.select(this)
-                  .style('stroke-width', '2px')
+                  .transition()
+                  .duration(250)
+                  .style('stroke-width', '3px')
                   .style("opacity",0.2);
-                d3.selectAll('legend').style("opacity", 0.2);
+
+                d3.selectAll('.legend')
+                  .transition()
+                  .duration(250)
+                  .selectAll('g')
+                  .style("font-weight", "normal");
               });
           });
 
@@ -124,7 +138,10 @@
             .attr("transform", "translate(" + (width - 100) + "," + 20 + ")")
             .selectAll("g")
             .data(months)
-            .enter().append("g");
+            .enter().append("g")
+            .attr("id", function(d) {
+              return "leg_" + d;
+            });
 
           legend.append("circle")
             .attr("cy", function(d, i) {
@@ -140,9 +157,7 @@
               return i * 30 + 5;
             })
             .attr("x", 3 * 5)
-            .attr("id", function(d) {
-              return "leg_" + d;
-            })
+
             .text(function(d) {
               return d;
             });
