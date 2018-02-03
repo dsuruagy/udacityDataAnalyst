@@ -6,7 +6,18 @@
     <style>
       .line {
         fill: none;
-        stroke-width: 2px;
+        stroke-width: 3px;
+      }
+
+      .axis_label {
+        text-anchor: middle;
+        font-family: sans-serif;
+        font-size: 15px;
+      }
+
+      .legend {
+        font-family: sans-serif;
+        font-size: 15px;
       }
     </style>
     <script type="text/javascript">
@@ -24,8 +35,8 @@
 	            .attr('class', 'chart');
 
           var minDelay = 0, maxDelay = 0;
-          var months = ['Jan','Feb','Mar','Apr','May','Jun',
-                        'Jul','Aug','Sep','Oct','Nov','Dec'];
+          var months = ['January','February','March','April','May','June',
+                        'July','August','September','October','November','December'];
 
           // aggregate data by month and departure hour
           var nested = d3.nest()
@@ -49,7 +60,7 @@
             return d.depInterval;
           });
 
-          var scaleInterval = d3.scaleTime()
+          var scaleHour = d3.scaleTime()
           .range([margin, width])
           .domain([xMin, xMax]);
 
@@ -63,28 +74,44 @@
 
           var colorScale = d3.scaleOrdinal(d3.schemeCategory20).domain([1,12]);
 
-          var timeAxis = d3.axisBottom(scaleInterval)
+          var timeAxis = d3.axisBottom(scaleHour)
             .ticks(24)
             .tickFormat(d3.timeFormat("%H:%M"));
 
     			var delayAxis = d3.axisLeft(scaleDelay);
 
+          // Add the x axis
     			svg.append('g')
     			.attr('class', 'x axis')
     			.attr('transform', "translate(0," + height + ")")
     			.call(timeAxis);
 
+          svg.append("text")
+            .attr("x", width / 2 )
+            .attr("y",  height + margin / 2)
+            .attr('class', 'axis_label')
+            .text("Departure time"); // x axis label
+
+          // Add the y axis
     			svg.append('g')
     			.attr('class', 'y axis')
     			.attr('transform', "translate(" + margin + ",0)")
     			.call(delayAxis);
+
+          svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", margin / 4)
+            .attr("x",0 - (height / 2))
+            .attr('class', 'axis_label')
+            .attr("dy", "1em")
+            .text("Mean flight delay (in minutes)"); // y axis label
 
           // specify what will be shown in the lines
           // http://bl.ocks.org/d3noob/d8be922a10cb0b148cd5
           var line = d3.line()
             .x(function(d) {
               // d['key'] is the hour
-              return scaleInterval(d3.isoParse(d.key));
+              return scaleHour(d3.isoParse(d.key));
             })
             .y(function(d) {
               // d['value'] is the delay value
@@ -114,9 +141,7 @@
                 d3.select("#leg_" + this.id)
                   .transition()
                   .duration(250)
-                  .style("font-weight", "bold");
-                // debugger;
-
+                  .style("opacity", 1);
               })
               .on("mouseout", function(d) {
                 d3.select(this)
@@ -129,35 +154,27 @@
                   .transition()
                   .duration(250)
                   .selectAll('g')
-                  .style("font-weight", "normal");
+                  .style("opacity", 0.1);
               });
           });
 
           var legend = svg.append("g")
             .attr("class", "legend")
-            .attr("transform", "translate(" + (width - 100) + "," + 20 + ")")
+            .attr("transform", "translate(" + (width) + "," + 0 + ")")
             .selectAll("g")
             .data(months)
             .enter().append("g")
             .attr("id", function(d) {
               return "leg_" + d;
-            });
-
-          legend.append("circle")
-            .attr("cy", function(d, i) {
-              return i * 30;
             })
-            .attr("r", 5)
-            .attr("fill", function(d, i) {
-              return colorScale(i+1)
-            });
+            .style("opacity", 0.1);
 
           legend.append("text")
             .attr("y", function(d, i) {
-              return i * 30 + 5;
+              // return the y coordinate of the last of the line
+              return scaleDelay(nested[i].values[23].value);
             })
-            .attr("x", 3 * 5)
-
+            .attr("x", 3)
             .text(function(d) {
               return d;
             });
