@@ -23,7 +23,7 @@
       div.tooltip {
         position: absolute;
         text-align: center;
-        width: 60px;
+        width: 150px;
         height: 28px;
         padding: 2px;
         font: 12px sans-serif;
@@ -50,10 +50,6 @@
           var minDelay = 0, maxDelay = 0;
           var months = ['January','February','March','April','May','June',
                         'July','August','September','October','November','December'];
-
-          function sleep (time) {
-            return new Promise((resolve) => setTimeout(resolve, time));
-          }
 
           // aggregate data by month and departure hour
           var nested = d3.nest()
@@ -165,46 +161,63 @@
             return d - d3.max(nestedMedian.values());
           });
 
-          var maxDelayLine = svg.select('#' + months[maxMonthDelayIndex] + '.line');
-          var minDelayLine = svg.select('#' + months[minMonthDelayIndex] + '.line');
+          function highlightLines(minIndex, maxIndex) {
+            var fadein = 1000, fadeout = 7000, index = 0;
 
-          function highlightLine(line) {
-            var fadein = 1000, fadeout = 7000;
+            var minMonth = months[minIndex];
+            var maxMonth = months[maxIndex];
 
-            line.transition()
-              .duration(fadein)
-              .style('stroke-width', '6px')
-              .style("opacity", 1)
-              .transition()
-              .duration(fadeout)
-              .style('stroke-width', '3px')
-              .style("opacity",0.2);
+            var maxDelayLine = svg.select('#' + maxMonth + '.line');
+            var minDelayLine = svg.select('#' + minMonth + '.line');
 
-            div.transition()
-              .duration(fadein)
-              .style("opacity", .9)
-              .transition()
-              .duration(fadeout)
-              .style("opacity", 0);
+            function sleep (time) {
+              return new Promise((resolve) => setTimeout(resolve, time));
+            }
+            // First highlights the month line with hightest delay and, after a
+            // few seconds, the month line with the lowest median delay:
+            highlight(maxDelayLine);
+            sleep(3000).then(() => {
+              highlight(minDelayLine);
+            });
 
-            div.html('Test' + "<br/>" + 'Line')
-              .style("left", width / 2 + "px")
-              .style("top", height / 2 + "px");
+            function highlight(line) {
+              line.transition()
+                .duration(fadein)
+                .style('stroke-width', '6px')
+                .style("opacity", 1);
 
+              div
+                .style("opacity", .9);
 
-            // line.transition()
-            //   .duration(7000)
-            //   .style('stroke-width', '3px')
-            //   .style("opacity",0.2);
+              div.html(function(l) {
+                if(line == maxDelayLine) {
+                  index = maxIndex;
+                  return maxMonth + ' has the hightest (' +
+                    d3.format(".2f")(nestedMedian.get(index + 1)) + ') median delay.';
+                } else {
+                  index = minIndex;
+                  return minMonth + ' has the lowest (' +
+                    d3.format(".2f")(nestedMedian.get(index + 1)) + ') median delay.';
+                }
+              })
+                .style("left", width / 2 + "px")
+                .style("top", function(l) {
+                  return scaleDelay(nested[index].values[11].value) + "px";
+                });
+
+              sleep(3000).then(() => {
+                line.transition()
+                  .duration(fadeout)
+                  .style('stroke-width', '3px')
+                  .style("opacity",0.2);
+
+                div
+                  .style("opacity", 0);
+              });
+            }
           }
 
-
-          // First highlights the month line with hightest delay and, after a
-          // few seconds, the month line with the lowest median delay:
-          highlightLine(maxDelayLine);
-          sleep(3000).then(() => {
-            highlightLine(minDelayLine);
-          });
+          highlightLines(minMonthDelayIndex, maxMonthDelayIndex);
 
           // Add event for highline selected lines
           svg.selectAll('path')
