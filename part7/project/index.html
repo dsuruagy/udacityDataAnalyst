@@ -12,12 +12,25 @@
       .axis_label {
         text-anchor: middle;
         font-family: sans-serif;
-        font-size: 15px;
+        font-size: 12px;
       }
 
       .legend {
         font-family: sans-serif;
         font-size: 15px;
+      }
+
+      div.tooltip {
+        position: absolute;
+        text-align: center;
+        width: 60px;
+        height: 28px;
+        padding: 2px;
+        font: 12px sans-serif;
+        background: lightsteelblue;
+        border: 0px;
+        border-radius: 8px;
+        pointer-events: none;
       }
     </style>
     <script type="text/javascript">
@@ -37,6 +50,10 @@
           var minDelay = 0, maxDelay = 0;
           var months = ['January','February','March','April','May','June',
                         'July','August','September','October','November','December'];
+
+          function sleep (time) {
+            return new Promise((resolve) => setTimeout(resolve, time));
+          }
 
           // aggregate data by month and departure hour
           var nested = d3.nest()
@@ -121,42 +138,102 @@
           // for each month in nested data, add a line for its values (hour and
           // delay)
           nested.forEach(function(d){
-            // debugger;
             svg.append("path")
               .attr("class", "line")
               .attr("id", getMonth(d.key))
               .attr("d", line(d.values))
               .style("stroke", colorScale(d.key))
               .style("opacity",0.2);
-
-            svg.selectAll('path')
-              .on("mouseover", function(d) {
-
-                d3.select(this)
-                  .transition()
-                  .duration(250)
-                  .style('stroke-width', '6px')
-                  .style("opacity", 1);
-
-                d3.select("#leg_" + this.id)
-                  .transition()
-                  .duration(250)
-                  .style("opacity", 1);
-              })
-              .on("mouseout", function(d) {
-                d3.select(this)
-                  .transition()
-                  .duration(250)
-                  .style('stroke-width', '3px')
-                  .style("opacity",0.2);
-
-                d3.selectAll('.legend')
-                  .transition()
-                  .duration(250)
-                  .selectAll('g')
-                  .style("opacity", 0.1);
-              });
           });
+
+          // Adds an invisible tooltip on the page
+          var div = d3.select("body").append("div")
+              .attr("class", "tooltip")
+              .style("opacity", 0);
+
+          // calculate the entire month median delay
+          var nestedMedian = d3.nest()
+            .key(function(d) { return d.Month})
+            .rollup(function(leaves) {
+              return d3.median(leaves, function(d) { return d.meanDelay });
+            })
+            .map(data);
+
+          var minMonthDelayIndex = d3.scan(nestedMedian.values());
+
+          var maxMonthDelayIndex = d3.scan(nestedMedian.values(), function(d) {
+            return d - d3.max(nestedMedian.values());
+          });
+
+          var maxDelayLine = svg.select('#' + months[maxMonthDelayIndex] + '.line');
+          var minDelayLine = svg.select('#' + months[minMonthDelayIndex] + '.line');
+
+          function highlightLine(line) {
+            var fadein = 1000, fadeout = 7000;
+
+            line.transition()
+              .duration(fadein)
+              .style('stroke-width', '6px')
+              .style("opacity", 1)
+              .transition()
+              .duration(fadeout)
+              .style('stroke-width', '3px')
+              .style("opacity",0.2);
+
+            div.transition()
+              .duration(fadein)
+              .style("opacity", .9)
+              .transition()
+              .duration(fadeout)
+              .style("opacity", 0);
+
+            div.html('Test' + "<br/>" + 'Line')
+              .style("left", width / 2 + "px")
+              .style("top", height / 2 + "px");
+
+
+            // line.transition()
+            //   .duration(7000)
+            //   .style('stroke-width', '3px')
+            //   .style("opacity",0.2);
+          }
+
+
+          // First highlights the month line with hightest delay and, after a
+          // few seconds, the month line with the lowest median delay:
+          highlightLine(maxDelayLine);
+          sleep(3000).then(() => {
+            highlightLine(minDelayLine);
+          });
+
+          // Add event for highline selected lines
+          svg.selectAll('path')
+            .on("mouseover", function(d) {
+
+              d3.select(this)
+                .transition()
+                .duration(250)
+                .style('stroke-width', '6px')
+                .style("opacity", 1);
+
+              d3.select("#leg_" + this.id)
+                .transition()
+                .duration(250)
+                .style("opacity", 1);
+            })
+            .on("mouseout", function(d) {
+              d3.select(this)
+                .transition()
+                .duration(250)
+                .style('stroke-width', '3px')
+                .style("opacity",0.2);
+
+              d3.selectAll('.legend')
+                .transition()
+                .duration(250)
+                .selectAll('g')
+                .style("opacity", 0.1);
+            });
 
           var legend = svg.append("g")
             .attr("class", "legend")
