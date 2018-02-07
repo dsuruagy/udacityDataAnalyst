@@ -53,6 +53,7 @@
 
           // aggregate data by month and departure time
           var nested = d3.nest()
+            .key(function(d) { return d.Year})
             .key(function(d) { return d.Month})
             .key(function(d) { return d.depInterval})
             .rollup(function(leaves) {
@@ -118,154 +119,165 @@
             .attr("dy", "1em")
             .text("Mean flight delay (in minutes)"); // y axis label
 
-          // specify what will be shown in the lines
-          var line = d3.line()
-            .x(function(d) {
-              // d['key'] is the hour
-              return scaleTime(d3.isoParse(d.key));
-            })
-            .y(function(d) {
-              // d['value'] is the delay value
-              return scaleDelay(d.value);
-            });
+          function update(year) {
+            var filtered = nested.filter(
+              function(d) {return d.key === year;}
+            )[0].values;
 
-          // for each month in nested data, add a line for its values (hour and
-          // delay)
-          nested.forEach(function(d){
-            svg.append("path")
-              .attr("class", "line")
-              .attr("id", getMonth(d.key))
-              .attr("d", line(d.values))
-              .style("stroke", colorScale(d.key))
-              .style("opacity",0.2);
-          });
-
-          // Adds an invisible tooltip on the page
-          var div = d3.select("body").append("div")
-              .attr("class", "tooltip")
-              .style("opacity", 0);
-
-          // calculate the entire month median delay
-          var nestedMedian = d3.nest()
-            .key(function(d) { return d.Month})
-            .rollup(function(leaves) {
-              return d3.median(leaves, function(d) { return d.meanDelay });
-            })
-            .map(data);
-
-          var minMonthDelayIndex = d3.scan(nestedMedian.values());
-
-          var maxMonthDelayIndex = d3.scan(nestedMedian.values(), function(d) {
-            return d - d3.max(nestedMedian.values());
-          });
-
-          function highlightLines(minIndex, maxIndex) {
-            var fadein = 500, fadeout = 500, index = 0;
-
-            var minMonth = months[minIndex];
-            var maxMonth = months[maxIndex];
-
-            var maxDelayLine = svg.select('#' + maxMonth + '.line');
-            var minDelayLine = svg.select('#' + minMonth + '.line');
-
-            function sleep (time) {
-              return new Promise((resolve) => setTimeout(resolve, time));
-            }
-            // First highlights the month line with hightest delay and, after a
-            // few seconds, the month line with the lowest median delay:
-            highlight(maxDelayLine);
-            sleep(6000).then(() => {
-              highlight(minDelayLine);
-            });
-
-            function highlight(line) {
-              line.transition()
-                .duration(fadein)
-                .style('stroke-width', '6px')
-                .style("opacity", 1);
-
-              div
-                .style("opacity", .9);
-
-              div.html(function(l) {
-                if(line == maxDelayLine) {
-                  index = maxIndex;
-                  return maxMonth + ' has the hightest (' +
-                    d3.format(".2f")(nestedMedian.get(index + 1)) + ') median delay.';
-                } else {
-                  index = minIndex;
-                  return minMonth + ' has the lowest (' +
-                    d3.format(".2f")(nestedMedian.get(index + 1)) + ') median delay.';
-                }
+            // specify what will be shown in the lines
+            var line = d3.line()
+              .x(function(d) {
+                // d['key'] is the hour
+                return scaleTime(d3.isoParse(d.key));
               })
-                .style("left", width / 2 + "px")
-                .style("top", function(l) {
-                  return scaleDelay(nested[index].values[11].value) + "px";
-                });
+              .y(function(d) {
+                // d['value'] is the delay value
+                return scaleDelay(d.value);
+              });
 
+            // for each month in nested data, add a line for its values (hour and
+            // delay)
+            filtered.forEach(function(d){
+              svg.append("path")
+                .attr("class", "line")
+                .attr("id", getMonth(d.key))
+                .attr("d", line(d.values))
+                .style("stroke", colorScale(d.key))
+                .style("opacity",0.2);
+            });
+
+            // Adds an invisible tooltip on the page
+            var div = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
+            // calculate the entire month median delay
+            var nestedMedian = d3.nest()
+              .key(function(d) { return d.Month})
+              .rollup(function(leaves) {
+                return d3.median(leaves, function(d) { return d.meanDelay });
+              })
+              .map(data);
+
+            var minMonthDelayIndex = nestedMedian.values()
+              .indexOf(d3.min(nestedMedian.values()));
+
+            var maxMonthDelayIndex = nestedMedian.values()
+              .indexOf(d3.max(nestedMedian.values()));
+
+            function highlightLines(minIndex, maxIndex) {
+              var fadein = 500, fadeout = 500, index = 0;
+
+              var minMonth = months[minIndex];
+              var maxMonth = months[maxIndex];
+
+              var maxDelayLine = svg.select('#' + maxMonth + '.line');
+              var minDelayLine = svg.select('#' + minMonth + '.line');
+
+              function sleep (time) {
+                return new Promise((resolve) => setTimeout(resolve, time));
+              }
+              // First highlights the month line with hightest delay and, after a
+              // few seconds, the month line with the lowest median delay:
+              highlight(maxDelayLine);
               sleep(6000).then(() => {
+                highlight(minDelayLine);
+              });
+
+              function highlight(line) {
                 line.transition()
-                  .duration(fadeout)
+                  .duration(fadein)
+                  .style('stroke-width', '6px')
+                  .style("opacity", 1);
+
+                div
+                  .style("opacity", .9);
+
+                div.html(function(l) {
+                  if(line == maxDelayLine) {
+                    index = maxIndex;
+                    return maxMonth + ' has the hightest (' +
+                      d3.format(".2f")(nestedMedian.get(index + 1))
+                        + ') median delay.';
+                  } else {
+                    index = minIndex;
+                    return minMonth + ' has the lowest (' +
+                      d3.format(".2f")(nestedMedian.get(index + 1))
+                        + ') median delay.';
+                  }
+                })
+                  .style("left", width / 2 + "px")
+                  .style("top", function(l) {
+                    // debugger;
+                    return scaleDelay(filtered[index].values[11].value) + "px";
+                  });
+
+                sleep(6000).then(() => {
+                  line.transition()
+                    .duration(fadeout)
+                    .style('stroke-width', '3px')
+                    .style("opacity",0.2);
+
+                  div
+                    .style("opacity", 0);
+                });
+              }
+            }
+
+            highlightLines(minMonthDelayIndex, maxMonthDelayIndex);
+
+            // Add event for highline selected lines
+            svg.selectAll('path')
+              .on("mouseover", function(d) {
+
+                d3.select(this)
+                  .transition()
+                  .duration(250)
+                  .style('stroke-width', '6px')
+                  .style("opacity", 1);
+
+                d3.select("#leg_" + this.id)
+                  .transition()
+                  .duration(250)
+                  .style("opacity", 1);
+              })
+              .on("mouseout", function(d) {
+                d3.select(this)
+                  .transition()
+                  .duration(250)
                   .style('stroke-width', '3px')
                   .style("opacity",0.2);
 
-                div
-                  .style("opacity", 0);
+                d3.selectAll('.legend')
+                  .transition()
+                  .duration(250)
+                  .selectAll('g')
+                  .style("opacity", 0.1);
               });
-            }
+
+            var legend = svg.append("g")
+              .attr("class", "legend")
+              .attr("transform", "translate(" + (width) + "," + 0 + ")")
+              .selectAll("g")
+              .data(months)
+              .enter().append("g")
+              .attr("id", function(d) {
+                return "leg_" + d;
+              })
+              .style("opacity", 0.1);
+
+            legend.append("text")
+              .attr("y", function(d, i) {
+                // return the y coordinate of the last of the line
+                return scaleDelay(filtered[i].values[23].value);
+              })
+              .attr("x", 3)
+              .text(function(d) {
+                return d;
+              });
           }
 
-          highlightLines(minMonthDelayIndex, maxMonthDelayIndex);
-
-          // Add event for highline selected lines
-          svg.selectAll('path')
-            .on("mouseover", function(d) {
-
-              d3.select(this)
-                .transition()
-                .duration(250)
-                .style('stroke-width', '6px')
-                .style("opacity", 1);
-
-              d3.select("#leg_" + this.id)
-                .transition()
-                .duration(250)
-                .style("opacity", 1);
-            })
-            .on("mouseout", function(d) {
-              d3.select(this)
-                .transition()
-                .duration(250)
-                .style('stroke-width', '3px')
-                .style("opacity",0.2);
-
-              d3.selectAll('.legend')
-                .transition()
-                .duration(250)
-                .selectAll('g')
-                .style("opacity", 0.1);
-            });
-
-          var legend = svg.append("g")
-            .attr("class", "legend")
-            .attr("transform", "translate(" + (width) + "," + 0 + ")")
-            .selectAll("g")
-            .data(months)
-            .enter().append("g")
-            .attr("id", function(d) {
-              return "leg_" + d;
-            })
-            .style("opacity", 0.1);
-
-          legend.append("text")
-            .attr("y", function(d, i) {
-              // return the y coordinate of the last of the line
-              return scaleDelay(nested[i].values[23].value);
-            })
-            .attr("x", 3)
-            .text(function(d) {
-              return d;
-            });
+          update('2008');
      }
     </script>
   </head>
@@ -273,7 +285,7 @@
   <script type="text/javascript">
   	var parseHour = d3.timeParse("%H:%M");
 
-    d3.csv("2008-mean.csv", function(d) {
+    d3.csv("flightDelays.csv", function(d) {
       d['depInterval'] = parseHour(d['depInterval']);
       d['meanDelay'] = +d['meanDelay'];
 
