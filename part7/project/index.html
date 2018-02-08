@@ -47,23 +47,14 @@
             .append('g')
             .attr('class', 'chart');
 
-          var minDelay = 0, maxDelay = 0;
           var months = ['January','February','March','April','May','June',
                         'July','August','September','October','November','December'];
 
-          // aggregate data by month and departure time
-          var nested = d3.nest()
-            .key(function(d) { return d.Year})
-            .key(function(d) { return d.Month})
-            .key(function(d) { return d.depInterval})
-            .rollup(function(leaves) {
-              // Aggregate by mean delays
-              var meanDelay = d3.mean(leaves, function(d) { return d.meanDelay});
-              minDelay = Math.min(minDelay, meanDelay);
-              maxDelay = Math.max(maxDelay, meanDelay);
-              return meanDelay;
-            })
-            .entries(data);
+          function getMonth(id) {
+            return months[id - 1];
+          }
+
+          var colorScale = d3.scaleOrdinal(d3.schemeCategory20).domain([1,12]);
 
           var xMin = d3.min(data, function(d) {
             return d.depInterval;
@@ -74,44 +65,61 @@
           });
 
           var scaleTime = d3.scaleTime()
-            .range([margin, width])
-            .domain([xMin, xMax]);
-
-          var scaleDelay = d3.scaleLinear()
-            .range([height, margin])
-            .domain([minDelay, maxDelay]);
-
-          function getMonth(id) {
-            return months[id - 1];
-          }
-
-          var colorScale = d3.scaleOrdinal(d3.schemeCategory20).domain([1,12]);
+          .range([margin, width])
+          .domain([xMin, xMax]);
 
           var timeAxis = d3.axisBottom(scaleTime)
-            .ticks(12)
-            .tickFormat(d3.timeFormat("%H:%M"));
-
-          var delayAxis = d3.axisLeft(scaleDelay);
+          .ticks(12)
+          .tickFormat(d3.timeFormat("%H:%M"));
 
           // Add the x axis
           svg.append('g')
-            .attr('class', 'x axis')
-            .attr('transform', "translate(0," + height + ")")
-            .call(timeAxis);
+          .attr('class', 'x axis')
+          .attr('transform', "translate(0," + height + ")")
+          .call(timeAxis);
 
           svg.append("text")
-            .attr("x", width / 2 )
-            .attr("y",  height + margin / 2)
-            .attr('class', 'axis_label')
-            .text("Departure time"); // x axis label
+          .attr("x", width / 2 )
+          .attr("y",  height + margin / 2)
+          .attr('class', 'axis_label')
+          .text("Departure time"); // x axis label
 
-          // Add the y axis
-          svg.append('g')
+          //
+          // Function used to update chart by the selected year
+          //
+          function update(year) {
+            var filtered = data.filter(
+              function(d) {
+                return d.Year === year;
+              });
+
+            var minDelay = 0, maxDelay = 0;
+            // aggregate data by month and departure time
+            var nested = d3.nest()
+              .key(function(d) { return d.Month})
+              .key(function(d) { return d.depInterval})
+              .rollup(function(leaves) {
+
+                var meanDelay = d3.mean(leaves, function(d) { return d.meanDelay});
+                minDelay = Math.min(minDelay, meanDelay);
+                maxDelay = Math.max(maxDelay, meanDelay);
+                return meanDelay;
+              })
+              .entries(filtered);
+
+            var scaleDelay = d3.scaleLinear()
+            .range([height, margin])
+            .domain([minDelay, maxDelay]);
+
+            var delayAxis = d3.axisLeft(scaleDelay);
+
+            // Add the y axis
+            svg.append('g')
             .attr('class', 'y axis')
             .attr('transform', "translate(" + margin + ",0)")
             .call(delayAxis);
 
-          svg.append("text")
+            svg.append("text")
             .attr("transform", "rotate(-90)")
             .attr("y", margin / 4)
             .attr("x",0 - (height / 2))
@@ -119,31 +127,26 @@
             .attr("dy", "1em")
             .text("Mean flight delay (in minutes)"); // y axis label
 
-          function update(year) {
-            var filtered = nested.filter(
-              function(d) {return d.key === year;}
-            )[0].values;
-
             // specify what will be shown in the lines
             var line = d3.line()
-              .x(function(d) {
-                // d['key'] is the hour
-                return scaleTime(d3.isoParse(d.key));
-              })
-              .y(function(d) {
-                // d['value'] is the delay value
-                return scaleDelay(d.value);
-              });
+            .x(function(d) {
+              // d['key'] is the hour
+              return scaleTime(d3.isoParse(d.key));
+            })
+            .y(function(d) {
+              // d['value'] is the delay value
+              return scaleDelay(d.value);
+            });
 
             // for each month in nested data, add a line for its values (hour and
             // delay)
-            filtered.forEach(function(d){
+            nested.forEach(function(d){
               svg.append("path")
-                .attr("class", "line")
-                .attr("id", getMonth(d.key))
-                .attr("d", line(d.values))
-                .style("stroke", colorScale(d.key))
-                .style("opacity",0.2);
+              .attr("class", "line")
+              .attr("id", getMonth(d.key))
+              .attr("d", line(d.values))
+              .style("stroke", colorScale(d.key))
+              .style("opacity",0.2);
             });
 
             // Adds an invisible tooltip on the page
@@ -157,7 +160,8 @@
               .rollup(function(leaves) {
                 return d3.median(leaves, function(d) { return d.meanDelay });
               })
-              .map(data);
+              .map(filtered);
+
 
             var minMonthDelayIndex = nestedMedian.values()
               .indexOf(d3.min(nestedMedian.values()));
@@ -209,7 +213,7 @@
                   .style("left", width / 2 + "px")
                   .style("top", function(l) {
                     // debugger;
-                    return scaleDelay(filtered[index].values[11].value) + "px";
+                    return scaleDelay(nested[index].values[11].value) + "px";
                   });
 
                 sleep(6000).then(() => {
@@ -269,7 +273,7 @@
             legend.append("text")
               .attr("y", function(d, i) {
                 // return the y coordinate of the last of the line
-                return scaleDelay(filtered[i].values[23].value);
+                return scaleDelay(nested[i].values[23].value);
               })
               .attr("x", 3)
               .text(function(d) {
