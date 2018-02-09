@@ -15,6 +15,13 @@
         font-size: 15px;
       }
 
+      .tip_label {
+        text-anchor: middle;
+        font-family: sans-serif;
+        font-size: 12px;
+        color: grey;
+      }
+
       .legend {
         font-family: sans-serif;
         font-size: 15px;
@@ -87,7 +94,12 @@
           //
           // Function used to update chart by the selected year
           //
-          function update(year) {
+          function update() {
+            // get value from menu selection
+            // the option values are set in HTML and correspond
+            //to the year value
+            var year = menu.property("value");
+
             var filtered = data.filter(
               function(d) {
                 return d.Year === year;
@@ -113,11 +125,15 @@
 
             var delayAxis = d3.axisLeft(scaleDelay);
 
+            svg.select('.y-axis').remove();
+
             // Add the y axis
             svg.append('g')
-            .attr('class', 'y axis')
+            .attr('class', 'y-axis')
             .attr('transform', "translate(" + margin + ",0)")
             .call(delayAxis);
+
+            svg.select('#y-label').remove();
 
             svg.append("text")
             .attr("transform", "rotate(-90)")
@@ -125,6 +141,7 @@
             .attr("x",0 - (height / 2))
             .attr('class', 'axis_label')
             .attr("dy", "1em")
+            .attr("id", "y-label")
             .text("Mean flight delay (in minutes)"); // y axis label
 
             // specify what will be shown in the lines
@@ -138,16 +155,17 @@
               return scaleDelay(d.value);
             });
 
-            // for each month in nested data, add a line for its values (hour and
-            // delay)
-            nested.forEach(function(d){
-              svg.append("path")
+            svg.selectAll(".line").remove();
+            svg.selectAll(".legend").remove();
+
+            svg.selectAll("path")
+              .data(nested).enter()
+              .append("path")
               .attr("class", "line")
-              .attr("id", getMonth(d.key))
-              .attr("d", line(d.values))
-              .style("stroke", colorScale(d.key))
+              .attr("id", (d) => getMonth(d.key))
+              .attr("d", (d) => line(d.values))
+              .style("stroke", (d) => colorScale(d.key))
               .style("opacity",0.2);
-            });
 
             // Adds an invisible tooltip on the page
             var div = d3.select("body").append("div")
@@ -281,7 +299,17 @@
               });
           }
 
-          update('2008');
+          // force data to update when menu is changed
+          var menu = d3.select("#menu select")
+              .on("change", change);
+
+          function change() {
+            d3.transition()
+                .duration(1500)
+                .each(update);
+          }
+
+          update();
      }
     </script>
   </head>
@@ -296,5 +324,16 @@
       return d;
     }, draw);
   </script>
+  <div>
+    <p id="menu" class="axis_label">Year:
+    <select>
+      <option value="1998">1998</option>
+      <option value="2003">2003</option>
+      <option value="2008">2008</option>
+    </select>
+  </div>
+  <div>
+    <p class="tip_label">Hover the mouse over the lines to see months.</p>
+  </div>
 </body>
 </html>
